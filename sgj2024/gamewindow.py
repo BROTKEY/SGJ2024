@@ -1,8 +1,9 @@
 import arcade
+from typing import Optional
 
 LEVELS = {
         1: {
-            "tilemap": arcade.load_tilemap("assets/test.json")
+            "tilemap": arcade.load_tilemap("assets/TEST.json")
             }
 }
 
@@ -12,7 +13,8 @@ class GameWindow(arcade.Window):
         self.debug = debug
 
         self.current_level = 1
-        self.wall_elements = Optional[arcade.SpriteList] = None
+        self.wall_elements: Optional[arcade.SpriteList] = None
+        self.load_level(1)
 
     def load_level(self, level):
         self.current_level = level

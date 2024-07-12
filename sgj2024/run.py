@@ -1,2 +1,8 @@
+import arcade
+
+from sgj2024.gamewindow import GameWindow
+from sgj2024.config import *
+
 def main():
-    raise Exception("Game not implemented!")
+    game = GameWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE)
+    arcade.run()

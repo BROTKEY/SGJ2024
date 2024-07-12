@@ -17,11 +17,17 @@ class GameWindow(arcade.Window):
         self.load_level(1)
 
     def load_level(self, level):
+        if self.debug:
+            print(f"Debug: Loading Level: {level}")
         self.current_level = level
         tile_map = LEVELS[level]["tilemap"]
-        
+
+        self.camera = arcade.Camera(self.width, self.height, self)
+
         self.wall_elements = tile_map.sprite_lists["Platforms"]
 
     def on_draw(self):
         self.clear()
+        self.camera.use()
+
         self.wall_elements.draw()

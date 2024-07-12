@@ -2,10 +2,11 @@ import arcade
 from typing import Optional
 
 LEVELS = {
-        1: {
-            "tilemap": arcade.load_tilemap("assets/TEST.json")
-            }
+    1: {
+        "tilemap": arcade.load_tilemap("assets/TEST.json")
+    }
 }
+
 
 class GameWindow(arcade.Window):
     def __init__(self, width, height, title, debug=False):

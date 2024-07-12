@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "SGJ2024"
+version = "0.1.0"
+description = "Our SGJ2024 game."
+authors = ["Your Name <you@example.com>"]
+readme = "README.md"
+
+packages = [
+    { include = "sgj2024"}
+]
+
+[tool.poetry.scripts]
+launch_game = "sgj2024.run:main"
+
+[tool.poetry.dependencies]
+python = ">=3.10"
+arcade = "^2.6.17"
+
+[tool.poetry.group.dev.dependencies]
+autopep8 = "^2.0.4"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

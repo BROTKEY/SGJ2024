@@ -1,2 +1,2 @@
 def main():
-    print("Main Code should go here")
+    raise Exception("Game not implemented!")

@@ -15,3 +15,4 @@ def main():
     game = GameWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE, debug=args.debug)
     game.setup()
     arcade.run()
+    game.cleanup()

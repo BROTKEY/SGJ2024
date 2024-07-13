@@ -6,8 +6,11 @@ from sgj2024.interfaces.xInputController import XInputController
 import numpy as np
 
 LEVELS = {
-    1: {
+    0: {
         "tilemap": arcade.load_tilemap("assets/TEST.json", SPRITE_SCALING_TILES)
+    },
+    1: {
+        "tilemap": arcade.load_tilemap("assets/Level1.json", SPRITE_SCALING_TILES)
     }
 }
 

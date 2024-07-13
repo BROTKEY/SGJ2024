@@ -53,6 +53,6 @@ class VoiceController(BaseController):
         self.running = False
         self.thread.join()
 
-    def getAnalogAxis(self) -> tuple[float, float]:
+    def pollAxis(self) -> tuple[float, float]:
         """return the value of the analog axis in order of strength, direction"""
         return self.volume, (self.freq * 2 - 1) * np.pi

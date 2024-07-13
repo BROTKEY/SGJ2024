@@ -56,7 +56,7 @@ class GameWindow(arcade.Window):
 
     def cleanup(self):
         """Cleanup (like stopping our interfaces)"""
-        pass
+        self.controller.stop()
 
     def load_level(self, level):
         if self.debug:
@@ -157,8 +157,3 @@ class GameWindow(arcade.Window):
         self.background_accents.draw()
         self.wall_elements.draw()
         self.player_list.draw()
-
-        s, d = self.voice_controller.getAnalogAxis()
-        # print(self.voice_controller.getAnalogAxis())
-        if s > 0 or d > 0:
-            print(s, d)

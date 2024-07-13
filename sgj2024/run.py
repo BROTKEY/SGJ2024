@@ -15,5 +15,4 @@ def main():
     game = GameWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE, debug=args.debug)
     game.setup()
     arcade.run()
-    if game.voice_controller:
-        game.voice_controller.stop()
+    game.cleanup()

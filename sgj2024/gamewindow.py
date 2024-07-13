@@ -37,7 +37,9 @@ class GameWindow(arcade.Window):
         self.player_list.append(self.player_sprite)
         self.load_level(1)
 
-        self.voice_controller = VoiceController()
+    def cleanup(self):
+        """Cleanup (like stopping our interfaces)"""
+        pass
 
     def load_level(self, level):
         if self.debug:

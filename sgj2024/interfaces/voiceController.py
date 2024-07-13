@@ -25,7 +25,6 @@ class VoiceController(BaseController):
         self.vol_max = 50
 
         self.thread = Thread(target=self)
-        self.thread.start()
 
 
     def __call__(self):
@@ -46,6 +45,9 @@ class VoiceController(BaseController):
             f = (imax - self.freq_min) / di
             # print(v, f)
             self.volume, self.freq = np.clip((v, f), 0., 1.)
+
+    def start(self):
+        self.thread.start()
             
     def stop(self):
         self.running = False

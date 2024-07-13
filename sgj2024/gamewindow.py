@@ -1,9 +1,15 @@
 import arcade
 from typing import Optional
+import numpy as np
+
 from sgj2024.sprites import PlayerSprite
 from sgj2024.config import *
-from sgj2024.interfaces.xInputController import *
-import numpy as np
+from sgj2024.interfaces.baseController import BaseController
+from sgj2024.interfaces.xInputController import XInputController
+from sgj2024.interfaces.whistleController import WhistleController
+
+
+
 
 LEVELS = {
     0: {
@@ -43,14 +49,14 @@ class GameWindow(arcade.Window):
         self.player_sprite = PlayerSprite()
         self.player_list.append(self.player_sprite)
 
-        self.controller = XInputController()
+        self.controller = WhistleController()
         self.controller.start()
 
         self.load_level(1)
 
     def cleanup(self):
         """Cleanup (like stopping our interfaces)"""
-        pass
+        self.controller.stop()
 
     def load_level(self, level):
         if self.debug:

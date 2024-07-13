@@ -58,6 +58,9 @@ class GameWindow(arcade.Window):
         self.current_level = level
         tile_map = LEVELS[level]["tilemap"]
 
+        self.map_bounds_x = tile_map.width * tile_map.tile_width * tile_map.scaling
+        self.map_bounds_y = tile_map.height * tile_map.tile_height * tile_map.scaling
+
         self.camera = arcade.Camera(self.width, self.height, self)
 
         start_sprite = tile_map.sprite_lists["Spawn"][0]
@@ -82,6 +85,26 @@ class GameWindow(arcade.Window):
                                        collision_type="wall",
                                        body_type=arcade.PymunkPhysicsEngine.STATIC
         )
+
+    def scroll_to_player(self):
+        """
+        Scroll the window to the player.
+
+        if CAMERA_SPEED is 1, the camera will immediately move to the desired position.
+        Anything between 0 and 1 will have the camera move to the location with a smoother
+        pan.
+        """
+        map_bounds = np.array([self.map_bounds_x, self.map_bounds_y])
+        camera_size = np.array([self.camera.viewport_width, self.camera.viewport_height])
+
+        target_position = np.array([self.player_sprite.center_x - self.width / 2,
+                        self.player_sprite.center_y - self.height / 2])
+        target_position = np.max([target_position, np.zeros(2)], axis=0)
+        target_position = np.min([target_position, map_bounds-camera_size], axis=0)
+
+        camera_speed = min(np.linalg.norm(target_position - np.array(self.camera.position)) * CAMERA_SPEED, 1)
+
+        self.camera.move_to(tuple(target_position), camera_speed)
 
     def on_key_press(self, key, modifiers):
         match key:
@@ -142,6 +165,8 @@ class GameWindow(arcade.Window):
                 self.yeet_force = [0,0]
 
         self.physics_engine.step()
+
+        self.scroll_to_player()
 
     def on_draw(self):
         self.clear()

@@ -34,6 +34,10 @@ class GameWindow(arcade.Window):
         self.physics_engine: Optional[arcade.PymunkPhysicsEngine] = None
         self.player_sprite = None
         self.player_list = arcade.SpriteList()
+        
+        self.start_sprite: Optional[arcade.Sprite] = None
+        self.finish_sprite: Optional[arcade.Sprite] = None
+        self.finish_list: Optional[arcade.SpriteList] = None
 
         self.yeet_force = [0,0]
         self.delta_v = 0
@@ -48,6 +52,8 @@ class GameWindow(arcade.Window):
         arcade.set_background_color((140,0,255))
         self.player_sprite = PlayerSprite()
         self.player_list.append(self.player_sprite)
+
+        self.finish_list = arcade.SpriteList()
 
         self.controller = XInputController()
         self.controller.start()
@@ -69,8 +75,11 @@ class GameWindow(arcade.Window):
 
         self.camera = arcade.Camera(self.width, self.height, self)
 
-        start_sprite = tile_map.sprite_lists["Spawn"][0]
-        self.player_sprite.set_position(start_sprite.position[0], start_sprite.position[1])
+        self.start_sprite = tile_map.sprite_lists["Spawn"][0]
+        self.player_sprite.set_position(*self.start_sprite.position)
+
+        self.finish_sprite = tile_map.sprite_lists["Finish"][0]
+        self.finish_list.append(self.finish_sprite)
 
         self.background_elements = tile_map.sprite_lists["Background"]
         self.background_accents = tile_map.sprite_lists["BackgroundAccents"]
@@ -91,6 +100,17 @@ class GameWindow(arcade.Window):
                                        collision_type="wall",
                                        body_type=arcade.PymunkPhysicsEngine.STATIC
         )
+
+        self.physics_engine.add_sprite(self.finish_sprite,
+                                       collision_type="finish",
+                                       body_type=arcade.PymunkPhysicsEngine.STATIC,
+        )
+
+        self.physics_engine.add_collision_handler("player", "finish", begin_handler=self.level_finished)
+
+    def level_finished(self, _0, _1, _2, _3, _4):
+        if self.debug: print("Level Finished!")
+        return False
 
     def scroll_to_player(self):
         """
@@ -184,4 +204,5 @@ class GameWindow(arcade.Window):
         self.background_elements.draw()
         self.background_accents.draw()
         self.wall_elements.draw()
+        self.finish_list.draw()
         self.player_list.draw()

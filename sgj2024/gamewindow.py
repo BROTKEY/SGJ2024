@@ -232,9 +232,9 @@ class GameWindow(arcade.Window):
 
             self.physics_engine.apply_force(self.player_sprite, tuple(vector))
 
-        self.player_sprite.update(self.delta_v / MAX_DELTAV)
-
         if self.debug:
+            yeet_angle = 0.0
+            yeet_strength = 0.0
             n_directions = self.w_pressed + self.a_pressed + self.s_pressed + self.d_pressed
             if n_directions != 0 and self.delta_v > 0:
                 if self.w_pressed:
@@ -255,9 +255,15 @@ class GameWindow(arcade.Window):
 
                 self.physics_engine.apply_force(
                     self.player_sprite, tuple(self.yeet_force))
+                yeet_angle = np.atan2(*self.yeet_force)
+                yeet_strength = np.linalg.norm(self.yeet_force) / np.linalg.norm((PLAYER_JETPACK_ACCELERATION, PLAYER_JETPACK_ACCELERATION))
                 self.yeet_force = [0, 0]
 
         self.physics_engine.step()
+
+        self.player_sprite.update(angle, impulse, self.delta_v / MAX_DELTAV)
+        if self.debug and yeet_strength > 0:
+            self.player_sprite.update(-yeet_angle, yeet_strength, self.delta_v / MAX_DELTAV)
 
         mark_delete = []
         for bottle, timer in self.active_bottles.items():

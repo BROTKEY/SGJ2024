@@ -6,7 +6,7 @@ from sgj2024.sprites import PlayerSprite
 from sgj2024.config import *
 from sgj2024.interfaces.baseController import BaseController
 from sgj2024.interfaces.xInputController import XInputController
-from sgj2024.interfaces.voiceController import VoiceController
+from sgj2024.interfaces.whistleController import WhistleController
 
 
 
@@ -49,7 +49,7 @@ class GameWindow(arcade.Window):
         self.player_sprite = PlayerSprite()
         self.player_list.append(self.player_sprite)
 
-        self.controller = VoiceController()
+        self.controller = WhistleController()
         self.controller.start()
 
         self.load_level(1)

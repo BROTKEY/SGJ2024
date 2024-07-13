@@ -47,6 +47,11 @@ class GameWindow(arcade.Window):
         self.s_pressed = False
         self.d_pressed = False
 
+        self.bottle_00_texture: Optional[arcade.texture.Texture] = None
+        self.bottle_01_texture: Optional[arcade.texture.Texture] = None
+        self.bottle_02_texture: Optional[arcade.texture.Texture] = None
+
+        self.active_bottles = {}
 
         self.controller: Optional[BaseController] = None
 
@@ -56,6 +61,16 @@ class GameWindow(arcade.Window):
         self.player_list.append(self.player_sprite)
 
         self.finish_list = arcade.SpriteList()
+
+        self.bottle_00_texture = arcade.load_texture(
+                "assets/SGJ24TILES/not_yet_sploding_cola.png"
+        )
+        self.bottle_01_texture = arcade.load_texture(
+                "assets/SGJ24TILES/sploding_cola_1.png"
+        )
+        self.bottle_02_texture = arcade.load_texture(
+                "assets/SGJ24TILES/sploding_cola_2.png"
+        )
 
         self.controller = XInputController()
         self.controller.start()
@@ -127,7 +142,7 @@ class GameWindow(arcade.Window):
         print(bottle_sprite)
         self.physics_engine.apply_force(player_sprite, (0, BOTTLE_ACCELERATION))
 
-        
+        self.active_bottles[bottle_sprite] = 90
         
         return False
 
@@ -196,8 +211,7 @@ class GameWindow(arcade.Window):
             vector *= impulse * min(self.delta_v, PLAYER_ACCELERATION)
 
             sub = min(self.delta_v, np.sum(np.abs(vector)))
-            self.delta_v = self.delta_v - \
-                sub
+            self.delta_v = self.delta_v - sub
             if self.debug:
                 print(self.delta_v, np.sum(vector), sub)
 
@@ -228,7 +242,22 @@ class GameWindow(arcade.Window):
 
         self.physics_engine.step()
 
+        mark_delete = []
+        for bottle, timer in self.active_bottles.items():
+            if timer % (BOTTLE_FRAME_TIMER*2) == 0:
+                bottle.texture = self.bottle_01_texture
+            elif timer % BOTTLE_FRAME_TIMER == 0:
+                bottle.texture = self.bottle_02_texture
+            self.active_bottles[bottle] -= 1
+            if timer == 0:
+                bottle.texture = self.bottle_00_texture
+                mark_delete.append(bottle)
+
+        for bottle in mark_delete:
+            self.active_bottles.pop(bottle)
+
         if self.player_sprite.position[0] < 60: self.physics_engine.set_position(self.player_sprite, (60, self.player_sprite.position[1]))
+        elif self.player_sprite.position[0] > self.map_bounds_x-60: self.physics_engine.set_position(self.player_sprite, (self.map_bounds_x-60, self.player_sprite.position[1]))
 
         self.scroll_to_player()
 

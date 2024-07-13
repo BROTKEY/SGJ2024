@@ -23,6 +23,7 @@ class GameWindow(arcade.Window):
         self.player_list = arcade.SpriteList()
 
         self.yeet_force = [0,0]
+        self.delta_v = 0
         self.w_pressed = False
         self.a_pressed = False
         self.s_pressed = False
@@ -86,16 +87,23 @@ class GameWindow(arcade.Window):
     def on_update(self, delta_time):
         self.camera.move((self.player_sprite.center_x-self.width/2, self.player_sprite.center_y-self.height/2))
 
+        player_on_ground = self.physics_engine.is_on_ground(self.player_sprite)
+
+        if player_on_ground:
+            self.delta_v = min(self.delta_v+DELTA_DELTAV, MAX_DELTAV)
+            if self.debug: print(self.delta_v)
+
         n_directions = self.w_pressed + self.a_pressed + self.s_pressed + self.d_pressed
-        if n_directions != 0:
-            if self.w_pressed: self.yeet_force[1] += 5
-            if self.a_pressed: self.yeet_force[0] -= 5
-            if self.s_pressed: self.yeet_force[1] -= 5
-            if self.d_pressed: self.yeet_force[0] += 5
-            print(self.yeet_force)
-        else:
-            self.physics_engine.set_friction(self.player_sprite, 0 if n_directions != 0 else PLAYER_FRICTION)
-            self.physics_engine.apply_force(self.player_sprite, tuple(self.yeet_force))
+        if n_directions != 0 and self.delta_v > 0:
+            force = [0,0]
+            if self.w_pressed: force[1] += min(self.delta_v/n_directions, PLAYER_ACCELERATION)
+            if self.a_pressed: force[0] -= min(self.delta_v/n_directions, PLAYER_ACCELERATION)
+            if self.s_pressed: force[1] -= min(self.delta_v/n_directions, PLAYER_ACCELERATION)
+            if self.d_pressed: force[0] += min(self.delta_v/n_directions, PLAYER_ACCELERATION)
+            self.delta_v -= min(self.delta_v, PLAYER_ACCELERATION)
+            if self.debug: print(self.delta_v, force)
+
+            self.physics_engine.apply_force(self.player_sprite, tuple(force))
             self.yeet_force = [0,0]
 
         self.physics_engine.step()

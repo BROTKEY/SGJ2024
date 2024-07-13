@@ -35,7 +35,6 @@ class GameWindow(arcade.Window):
 
         self.physics_engine: Optional[arcade.PymunkPhysicsEngine] = None
         self.player_sprite = None
-        self.player_list = arcade.SpriteList()
         
         self.start_sprite: Optional[arcade.Sprite] = None
         self.finish_sprite: Optional[arcade.Sprite] = None
@@ -59,7 +58,6 @@ class GameWindow(arcade.Window):
     def setup(self):
         arcade.set_background_color((140, 0, 255))
         self.player_sprite = PlayerSprite()
-        self.player_list.append(self.player_sprite)
 
         self.finish_list = arcade.SpriteList()
 
@@ -290,5 +288,4 @@ class GameWindow(arcade.Window):
         self.finish_list.draw()
         self.bottles.draw()
         self.cacti.draw()
-        # self.player_list.draw()
         self.player_sprite.draw()

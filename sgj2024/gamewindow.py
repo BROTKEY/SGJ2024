@@ -1,10 +1,15 @@
 import arcade
 from typing import Optional
+import numpy as np
+
 from sgj2024.sprites import PlayerSprite
 from sgj2024.config import *
+from sgj2024.interfaces.baseController import BaseController
 from sgj2024.interfaces.xInputController import XInputController
-import numpy as np
 from sgj2024.interfaces.voiceController import VoiceController
+
+
+
 
 LEVELS = {
     0: {
@@ -35,7 +40,7 @@ class GameWindow(arcade.Window):
         self.s_pressed = False
         self.d_pressed = False
         
-        self.controller: Optional[XInputController] = None
+        self.controller: Optional[BaseController] = None
 
     def setup(self):
         arcade.set_background_color((140,0,255))

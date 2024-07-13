@@ -49,7 +49,7 @@ class GameWindow(arcade.Window):
         self.player_sprite = PlayerSprite()
         self.player_list.append(self.player_sprite)
 
-        self.controller = XInputController()
+        self.controller = VoiceController()
         self.controller.start()
 
         self.load_level(1)
@@ -67,7 +67,7 @@ class GameWindow(arcade.Window):
         self.camera = arcade.Camera(self.width, self.height, self)
 
         start_sprite = tile_map.sprite_lists["Spawn"][0]
-        self.player_sprite.set_position(start_sprite.postition[0], start_sprite.position[1])
+        self.player_sprite.set_position(start_sprite.position[0], start_sprite.position[1])
 
         self.background_elements = tilemap.sprite_lists["Background"]
         self.background_accents = tilemap.sprite_lists["BackgroundAccents"]

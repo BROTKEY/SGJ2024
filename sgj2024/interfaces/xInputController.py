@@ -29,7 +29,10 @@ class XInputController(BaseController):
     def stop(self):
         self.controller.close()
 
-    def getAnalogAxis(self, deltaTime):
+    def getAnalogAxis(self, _):
         if self.controller.leftx < -0.8 or self.controller.leftx > 0.8 or self.controller.lefty < -0.8 or self.controller.lefty > 0.8:
             self.angle = self.angle_between((self.controller.leftx, self.controller.lefty), (1,0))
         self.impulse = self.controller.righttrigger
+    
+    def pollAxis(self):
+        return self.impulse, self.angle

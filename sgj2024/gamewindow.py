@@ -2,7 +2,7 @@ import arcade
 from typing import Optional
 from sgj2024.sprites import PlayerSprite
 from sgj2024.config import *
-from sgj2024.interfaces.xInputController import XInputController
+from sgj2024.interfaces.xInputController import *
 import numpy as np
 
 LEVELS = {
@@ -21,6 +21,8 @@ class GameWindow(arcade.Window):
         self.debug = debug
 
         self.current_level = 1
+        self.background_elements: Optional[arcade.SpriteList] = None
+        self.background_accents: Optional[arcade.SpriteList] = None
         self.wall_elements: Optional[arcade.SpriteList] = None
 
         self.physics_engine: Optional[arcade.PymunkPhysicsEngine] = None
@@ -34,12 +36,11 @@ class GameWindow(arcade.Window):
         self.s_pressed = False
         self.d_pressed = False
         
-        self.controller: Optional[XInputController] = None
+        self.controller: Optional[BaseController] = None
 
     def setup(self):
         arcade.set_background_color((140,0,255))
         self.player_sprite = PlayerSprite()
-        self.player_sprite.set_position(500,500)
         self.player_list.append(self.player_sprite)
 
         self.controller = XInputController()
@@ -59,6 +60,11 @@ class GameWindow(arcade.Window):
 
         self.camera = arcade.Camera(self.width, self.height, self)
 
+        start_sprite = tile_map.sprite_lists["Spawn"][0]
+        self.player_sprite.set_position(start_sprite.postition[0], start_sprite.position[1])
+
+        self.background_elements = tilemap.sprite_lists["Background"]
+        self.background_accents = tilemap.sprite_lists["BackgroundAccents"]
         self.wall_elements = tile_map.sprite_lists["Platforms"]
 
         self.physics_engine = arcade.PymunkPhysicsEngine(damping=PHYSICS_DAMPING, gravity=(0,-PHYSICS_GRAVITY))
@@ -97,7 +103,7 @@ class GameWindow(arcade.Window):
             case arcade.key.S:
                 self.s_pressed = False
             case arcade.key.D:
-                self.d_pressed = False
+                self.d_pressed = FaXInputControllerlse
 
     def on_update(self, delta_time):
         self.camera.move((self.player_sprite.center_x-self.width/2, self.player_sprite.center_y-self.height/2))
@@ -141,5 +147,7 @@ class GameWindow(arcade.Window):
         self.clear()
         self.camera.use()
 
+        self.background_elements.draw()
+        self.background_accents.draw()
         self.wall_elements.draw()
         self.player_list.draw()

@@ -31,6 +31,7 @@ class GameWindow(arcade.Window):
         self.background_accents: Optional[arcade.SpriteList] = None
         self.wall_elements: Optional[arcade.SpriteList] = None
         self.bottles: Optional[arcade.SpriteList] = None
+        self.cacti: Optional[arcade.SpriteList] = None
 
         self.physics_engine: Optional[arcade.PymunkPhysicsEngine] = None
         self.player_sprite = None
@@ -103,6 +104,7 @@ class GameWindow(arcade.Window):
         self.background_accents = tile_map.sprite_lists["BackgroundAccents"]
         self.wall_elements = tile_map.sprite_lists["Platforms"]
         self.bottles = tile_map.sprite_lists["Bottles"]
+        self.cacti = tile_map.sprite_lists["Cacti"]
 
         self.physics_engine = arcade.PymunkPhysicsEngine(
             damping=PHYSICS_DAMPING, gravity=(0, -PHYSICS_GRAVITY))
@@ -126,10 +128,14 @@ class GameWindow(arcade.Window):
                                        body_type=arcade.PymunkPhysicsEngine.STATIC,
         )
 
+        self.physics_engine.add_sprite_list(self.cacti, collision_type="cacti", body_type=arcade.PymunkPhysicsEngine.STATIC)
+
         self.physics_engine.add_sprite_list(
             self.bottles, friction=WALL_FRICTION, collision_type="bottle", body_type=arcade.PymunkPhysicsEngine.STATIC)
         
         self.physics_engine.add_collision_handler("player", "bottle", self.bottle_colision_handler)
+
+        self.physics_engine.add_collision_handler("player", "cacti", self.cacti_colision_handler)
 
         self.physics_engine.add_collision_handler("player", "finish", begin_handler=self.level_finished)
 
@@ -137,10 +143,20 @@ class GameWindow(arcade.Window):
         if self.debug: print("Level Finished!")
         return False
 
+    def cacti_colision_handler(self, player_sprite: PlayerSprite, cacti_sprite: arcade.Sprite, arbiter: pymunk.Arbiter, space, data):
+        velocity = self.physics_engine.get_physics_object(self.player_sprite).body.velocity
+        counterforce = np.array(velocity) * -1
+        print(velocity)
+        print(counterforce)
+        self.physics_engine.set_velocity(self.player_sprite, tuple(counterforce))
+        return True
 
     def bottle_colision_handler(self, player_sprite: PlayerSprite, bottle_sprite: arcade.Sprite, arbiter: pymunk.Arbiter, space, data):
-        print(bottle_sprite)
-        self.physics_engine.apply_force(player_sprite, (0, BOTTLE_ACCELERATION))
+        vector = np.zeros((2))
+        vector[1] = np.cos(bottle_sprite.radians)
+        vector[0] = -np.sin(bottle_sprite.radians)
+
+        self.physics_engine.apply_force(player_sprite, tuple(vector * BOTTLE_ACCELERATION))
 
         self.active_bottles[bottle_sprite] = 90
         
@@ -271,4 +287,5 @@ class GameWindow(arcade.Window):
         self.wall_elements.draw()
         self.finish_list.draw()
         self.bottles.draw()
+        self.cacti.draw()
         self.player_list.draw()

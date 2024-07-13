@@ -1,24 +1,35 @@
 from sgj2024.interfaces.baseController import BaseController
 import pyglet.input as input 
-import pyglet.input.controller as controller
+import numpy as np
+import pyglet
 
 class XInputController(BaseController):
-    def __init__(self) -> None:
-        super().__init__()
-
-    def getAnalogAxis(self):
-        return 0,0
-
-def XInputAdapter():
     def __init__(self):
-        controllers = input.get_controllers()
-        self.controller = controllers[0].open()
+        super().__init__()
+        self.controllers = input.get_controllers()
+        self.angle = 0
+        self.impulse = 0
 
-    @controller.event
-    def on_stick_motion(controller, name, x_value, y_value):
-        if name == "leftstick":
-            pass
-            # Do something with the x/y_values
-        elif name == "rightstick":
-            pass
-            # Do something with the x/y_values
+    def unit_vector(self, vector):
+        """ Returns the unit vector of the vector.  """
+        return vector / np.linalg.norm(vector)
+
+    def angle_between(self, v1, v2):
+        _, ly = v1
+        v1_u = self.unit_vector(v1)
+        v2_u = self.unit_vector(v2)
+        side = 1 if ly < 0 else -1
+        return np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0)) / side
+
+    def start(self):
+        self.controller = self.controllers[0]
+        self.controller.open()
+        pyglet.clock.schedule_interval(self.getAnalogAxis, 1/60.0)
+
+    def stop(self):
+        self.controller.close()
+
+    def getAnalogAxis(self, deltaTime):
+        if self.controller.leftx < -0.8 or self.controller.leftx > 0.8 or self.controller.lefty < -0.8 or self.controller.lefty > 0.8:
+            self.angle = self.angle_between((self.controller.leftx, self.controller.lefty), (1,0))
+        self.impulse = self.controller.righttrigger

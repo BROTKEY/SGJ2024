@@ -49,7 +49,7 @@ class GameWindow(arcade.Window):
         self.player_sprite = PlayerSprite()
         self.player_list.append(self.player_sprite)
 
-        self.controller = WhistleController()
+        self.controller = XInputController()
         self.controller.start()
 
         self.load_level(1)
@@ -151,8 +151,9 @@ class GameWindow(arcade.Window):
             vector[1] = np.sin(angle)
             vector *= impulse * min(self.delta_v, PLAYER_ACCELERATION)
 
-            self.delta_v = self.delta_v - min(self.delta_v, impulse*PLAYER_ACCELERATION)
-            if self.debug: print(self.delta_v, impulse)
+            sub = min(self.delta_v, np.sum(np.abs(vector)))
+            self.delta_v = self.delta_v - sub
+            if self.debug: print(self.delta_v, np.sum(vector), sub)
             
             self.physics_engine.apply_force(self.player_sprite, tuple(vector))
 
@@ -171,6 +172,8 @@ class GameWindow(arcade.Window):
                 self.yeet_force = [0,0]
 
         self.physics_engine.step()
+
+        if self.player_sprite.position[0] < 60: self.physics_engine.set_position(self.player_sprite, (60, self.player_sprite.position[1]))
 
         self.scroll_to_player()
 

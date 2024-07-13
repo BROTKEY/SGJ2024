@@ -34,7 +34,7 @@ class XInputController(BaseController):
         if self.controller.leftx < -0.8 or self.controller.leftx > 0.8 or self.controller.lefty < -0.8 or self.controller.lefty > 0.8:
             self.angle = self.angle_between((self.controller.leftx, self.controller.lefty), (1,0))
         self.impulse = self.controller.righttrigger
-        self.controller.rumble_play_strong(self.impulse, delta_time)
+        self.controller.rumble_play_weak(self.impulse, delta_time)
     
     def pollAxis(self):
         return self.impulse, self.angle

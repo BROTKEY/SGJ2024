@@ -198,22 +198,23 @@ class GameWindow(arcade.Window):
         impulse, angle = self.controller.pollAxis()
 
         player_on_ground = self.physics_engine.is_on_ground(self.player_sprite)
+    
+        self.player_sprite.pymunk.max_horizontal_velocity = PLAYER_MAX_HORIZONTAL_VELOCITY if player_on_ground else PLAYER_MAX_HORIZONTAL_AIR_VELOCITY
 
         if player_on_ground:
             self.delta_v = min(self.delta_v+DELTA_DELTAV, MAX_DELTAV)
-            if self.debug:
-                print(self.delta_v)
 
-        if self.delta_v > 0 and impulse != 0:
+        if impulse != 0:
             vector = np.zeros((2))
             vector[0] = np.cos(angle)
-            vector[1] = np.sin(angle)
-            vector *= impulse * min(self.delta_v, PLAYER_ACCELERATION)
+            vector[1] = np.sin(angle) * (not player_on_ground or ((angle > 0.3 or angle < -0.3) and (angle > -2.8 or angle < 2.8)))
+            vector[0] *= impulse * min(self.delta_v, PLAYER_GROUND_ACCELERATION if player_on_ground else PLAYER_JETPACK_ACCELERATION if self.delta_v > 0 else PLAYER_AIR_ACCELERATION)
+            vector[1] *= impulse * min(self.delta_v, PLAYER_JETPACK_ACCELERATION)
 
             sub = min(self.delta_v, np.sum(np.abs(vector)))
-            self.delta_v = self.delta_v - sub
+            self.delta_v = self.delta_v - (0 if player_on_ground else sub)
             if self.debug:
-                print(self.delta_v, np.sum(vector), sub)
+                print(self.delta_v, vector, sub)
 
             self.physics_engine.apply_force(self.player_sprite, tuple(vector))
 
@@ -222,17 +223,17 @@ class GameWindow(arcade.Window):
             if n_directions != 0 and self.delta_v > 0:
                 if self.w_pressed:
                     self.yeet_force[1] += min(self.delta_v /
-                                              n_directions, PLAYER_ACCELERATION)
+                                              n_directions, PLAYER_GROUND_ACCELERATION)
                 if self.a_pressed:
                     self.yeet_force[0] -= min(self.delta_v /
-                                              n_directions, PLAYER_ACCELERATION)
+                                              n_directions, PLAYER_GROUND_ACCELERATION)
                 if self.s_pressed:
                     self.yeet_force[1] -= min(self.delta_v /
-                                              n_directions, PLAYER_ACCELERATION)
+                                              n_directions, PLAYER_GROUND_ACCELERATION)
                 if self.d_pressed:
                     self.yeet_force[0] += min(self.delta_v /
-                                              n_directions, PLAYER_ACCELERATION)
-                self.delta_v -= min(self.delta_v, PLAYER_ACCELERATION)
+                                              n_directions, PLAYER_GROUND_ACCELERATION)
+                self.delta_v -= min(self.delta_v, PLAYER_GROUND_ACCELERATION)
                 if self.debug:
                     print(self.delta_v, self.yeet_force)
 

@@ -177,6 +177,7 @@ class GameWindow(arcade.Window):
             
             self.physics_engine.apply_force(self.player_sprite, tuple(vector))
 
+        self.player_sprite.update(self.delta_v / MAX_DELTAV)
 
         if self.debug:
             n_directions = self.w_pressed + self.a_pressed + self.s_pressed + self.d_pressed
@@ -205,4 +206,5 @@ class GameWindow(arcade.Window):
         self.background_accents.draw()
         self.wall_elements.draw()
         self.finish_list.draw()
-        self.player_list.draw()
+        # self.player_list.draw()
+        self.player_sprite.draw()

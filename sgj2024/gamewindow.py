@@ -2,6 +2,7 @@ import arcade
 from typing import Optional
 import numpy as np
 import pymunk
+import time
 
 from sgj2024.sprites import PlayerSprite
 from sgj2024.config import *
@@ -45,6 +46,7 @@ class GameWindow(arcade.Window):
         self.a_pressed = False
         self.s_pressed = False
         self.d_pressed = False
+
 
         self.controller: Optional[BaseController] = None
 
@@ -121,10 +123,12 @@ class GameWindow(arcade.Window):
         return False
 
 
-    def bottle_colision_handler(self, player_sprite: PlayerSprite, wall_sprite: arcade.sprite, arbiter: pymunk.Arbiter, space, data):
-        print(wall_sprite)
-        self.physics_engine.apply_force(player_sprite, (0, BOTTLE_MULTIPLIER* PLAYER_ACCELERATION))
-        wall_sprite.load
+    def bottle_colision_handler(self, player_sprite: PlayerSprite, bottle_sprite: arcade.Sprite, arbiter: pymunk.Arbiter, space, data):
+        print(bottle_sprite)
+        self.physics_engine.apply_force(player_sprite, (0, BOTTLE_ACCELERATION))
+
+        
+        
         return False
 
     def scroll_to_player(self):

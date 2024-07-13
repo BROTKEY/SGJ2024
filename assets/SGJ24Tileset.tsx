@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.8" tiledversion="1.8.0" name="SGJ24Tileset" tilewidth="512" tileheight="1024" tilecount="12" columns="0">
+<tileset version="1.8" tiledversion="1.8.0" name="SGJ24Tileset" tilewidth="512" tileheight="1024" tilecount="19" columns="0">
  <grid orientation="orthogonal" width="1" height="1"/>
  <tile id="0">
   <image width="256" height="256" source="SGJ24TILES/asset1.png"/>
@@ -34,7 +34,32 @@
  <tile id="13">
   <image width="256" height="512" source="SGJ24TILES/cactus_2_psd.png"/>
  </tile>
- <tile id="15">
+ <tile id="16">
+  <image width="256" height="1024" source="SGJ24TILES/not_yet_sploding_cola.png"/>
+ </tile>
+ <tile id="17">
+  <image width="256" height="1024" source="SGJ24TILES/sploding_cola_1.png"/>
+  <animation>
+   <frame tileid="17" duration="300"/>
+   <frame tileid="18" duration="300"/>
+  </animation>
+ </tile>
+ <tile id="18">
+  <image width="256" height="1024" source="SGJ24TILES/sploding_cola_2.png"/>
+ </tile>
+ <tile id="19">
   <image width="256" height="512" source="SGJ24TILES/flying_cactus.png"/>
+ </tile>
+ <tile id="20">
+  <image width="512" height="512" source="SGJ24TILES/eee53f1bae834b35.png"/>
+ </tile>
+ <tile id="21">
+  <image width="256" height="256" source="SGJ24TILES/Cursor.png"/>
+ </tile>
+ <tile id="22">
+  <image width="512" height="768" source="SGJ24TILES/palm.png"/>
+ </tile>
+ <tile id="23">
+  <image width="256" height="256" source="SGJ24TILES/Cursor_texture.png"/>
  </tile>
 </tileset>

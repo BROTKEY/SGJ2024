@@ -1,5 +1,6 @@
 import arcade
 from typing import Optional
+from sgj2024.interfaces.voiceController import VoiceController
 
 LEVELS = {
     1: {
@@ -17,6 +18,8 @@ class GameWindow(arcade.Window):
         self.wall_elements: Optional[arcade.SpriteList] = None
         self.load_level(1)
 
+        self.voice_controller = VoiceController()
+
     def load_level(self, level):
         if self.debug:
             print(f"Debug: Loading Level: {level}")
@@ -32,3 +35,8 @@ class GameWindow(arcade.Window):
         self.camera.use()
 
         self.wall_elements.draw()
+
+        s, d = self.voice_controller.getAnalogAxis()
+        # print(self.voice_controller.getAnalogAxis())
+        if s > 0 or d > 0:
+            print(s, d)

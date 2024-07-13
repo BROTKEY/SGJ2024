@@ -13,3 +13,5 @@ def main():
         print("Launching Game in Debug Mode")
     game = GameWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE, debug=args.debug)
     arcade.run()
+    if game.voice_controller:
+        game.voice_controller.stop()

@@ -15,6 +15,8 @@ launch_game = "sgj2024.run:main"
 [tool.poetry.dependencies]
 python = ">=3.10"
 arcade = "^2.6.17"
+numpy = ">=2.0.0"
+pyaudio = ">=0.2.14"
 
 [tool.poetry.group.dev.dependencies]
 autopep8 = "^2.0.4"

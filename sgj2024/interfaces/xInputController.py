@@ -22,17 +22,19 @@ class XInputController(BaseController):
         return np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0)) / side
 
     def start(self):
-        self.controller = self.controllers[0]
-        self.controller.open()
-        pyglet.clock.schedule_interval(self.getAnalogAxis, 1/60.0)
+        if len(self.controllers) > 0:
+            self.controller = self.controllers[0]
+            self.controller.open()
+            pyglet.clock.schedule_interval(self.getAnalogAxis, 1/60.0)
 
     def stop(self):
         self.controller.close()
 
-    def getAnalogAxis(self, _):
+    def getAnalogAxis(self, delta_time):
         if self.controller.leftx < -0.8 or self.controller.leftx > 0.8 or self.controller.lefty < -0.8 or self.controller.lefty > 0.8:
             self.angle = self.angle_between((self.controller.leftx, self.controller.lefty), (1,0))
         self.impulse = self.controller.righttrigger
+        self.controller.rumble_play_strong(self.impulse, delta_time)
     
     def pollAxis(self):
         return self.impulse, self.angle

@@ -1,14 +1,13 @@
 import arcade
 from typing import Optional
 import numpy as np
+import pymunk
 
 from sgj2024.sprites import PlayerSprite
 from sgj2024.config import *
 from sgj2024.interfaces.baseController import BaseController
 from sgj2024.interfaces.xInputController import XInputController
 from sgj2024.interfaces.whistleController import WhistleController
-
-
 
 
 LEVELS = {
@@ -30,6 +29,7 @@ class GameWindow(arcade.Window):
         self.background_elements: Optional[arcade.SpriteList] = None
         self.background_accents: Optional[arcade.SpriteList] = None
         self.wall_elements: Optional[arcade.SpriteList] = None
+        self.bottles: Optional[arcade.SpriteList] = None
 
         self.physics_engine: Optional[arcade.PymunkPhysicsEngine] = None
         self.player_sprite = None
@@ -39,17 +39,17 @@ class GameWindow(arcade.Window):
         self.finish_sprite: Optional[arcade.Sprite] = None
         self.finish_list: Optional[arcade.SpriteList] = None
 
-        self.yeet_force = [0,0]
+        self.yeet_force = [0, 0]
         self.delta_v = 0
         self.w_pressed = False
         self.a_pressed = False
         self.s_pressed = False
         self.d_pressed = False
-        
+
         self.controller: Optional[BaseController] = None
 
     def setup(self):
-        arcade.set_background_color((140,0,255))
+        arcade.set_background_color((140, 0, 255))
         self.player_sprite = PlayerSprite()
         self.player_list.append(self.player_sprite)
 
@@ -76,7 +76,8 @@ class GameWindow(arcade.Window):
         self.camera = arcade.Camera(self.width, self.height, self)
 
         self.start_sprite = tile_map.sprite_lists["Spawn"][0]
-        self.player_sprite.set_position(*self.start_sprite.position)
+        self.player_sprite.set_position(*self.
+            start_sprite.position)
 
         self.finish_sprite = tile_map.sprite_lists["Finish"][0]
         self.finish_list.append(self.finish_sprite)
@@ -84,8 +85,10 @@ class GameWindow(arcade.Window):
         self.background_elements = tile_map.sprite_lists["Background"]
         self.background_accents = tile_map.sprite_lists["BackgroundAccents"]
         self.wall_elements = tile_map.sprite_lists["Platforms"]
+        self.bottles = tile_map.sprite_lists["Bottles"]
 
-        self.physics_engine = arcade.PymunkPhysicsEngine(damping=PHYSICS_DAMPING, gravity=(0,-PHYSICS_GRAVITY))
+        self.physics_engine = arcade.PymunkPhysicsEngine(
+            damping=PHYSICS_DAMPING, gravity=(0, -PHYSICS_GRAVITY))
         self.physics_engine.add_sprite(self.player_sprite,
                                        friction=PLAYER_FRICTION,
                                        mass=PLAYER_MASS,
@@ -93,23 +96,35 @@ class GameWindow(arcade.Window):
                                        collision_type="player",
                                        max_horizontal_velocity=PLAYER_MAX_HORIZONTAL_VELOCITY,
                                        max_vertical_velocity=PLAYER_MAX_VERTICAL_VELOCITY
-        )
+                                       )
 
         self.physics_engine.add_sprite_list(self.wall_elements,
-                                       friction=WALL_FRICTION,
-                                       collision_type="wall",
-                                       body_type=arcade.PymunkPhysicsEngine.STATIC
-        )
+                                            friction=WALL_FRICTION,
+                                            collision_type="wall",
+                                            body_type=arcade.PymunkPhysicsEngine.STATIC
+                                            )
 
         self.physics_engine.add_sprite(self.finish_sprite,
                                        collision_type="finish",
                                        body_type=arcade.PymunkPhysicsEngine.STATIC,
         )
 
+        self.physics_engine.add_sprite_list(
+            self.bottles, friction=WALL_FRICTION, collision_type="bottle", body_type=arcade.PymunkPhysicsEngine.STATIC)
+        
+        self.physics_engine.add_collision_handler("player", "bottle", self.bottle_colision_handler)
+
         self.physics_engine.add_collision_handler("player", "finish", begin_handler=self.level_finished)
 
     def level_finished(self, _0, _1, _2, _3, _4):
         if self.debug: print("Level Finished!")
+        return False
+
+
+    def bottle_colision_handler(self, player_sprite: PlayerSprite, wall_sprite: arcade.sprite, arbiter: pymunk.Arbiter, space, data):
+        print(wall_sprite)
+        self.physics_engine.apply_force(player_sprite, (0, BOTTLE_MULTIPLIER* PLAYER_ACCELERATION))
+        wall_sprite.load
         return False
 
     def scroll_to_player(self):
@@ -121,14 +136,17 @@ class GameWindow(arcade.Window):
         pan.
         """
         map_bounds = np.array([self.map_bounds_x, self.map_bounds_y])
-        camera_size = np.array([self.camera.viewport_width, self.camera.viewport_height])
+        camera_size = np.array(
+            [self.camera.viewport_width, self.camera.viewport_height])
 
         target_position = np.array([self.player_sprite.center_x - self.width / 2,
-                        self.player_sprite.center_y - self.height / 2])
+                                    self.player_sprite.center_y - self.height / 2])
         target_position = np.max([target_position, np.zeros(2)], axis=0)
-        target_position = np.min([target_position, map_bounds-camera_size], axis=0)
+        target_position = np.min(
+            [target_position, map_bounds-camera_size], axis=0)
 
-        camera_speed = min(np.linalg.norm(target_position - np.array(self.camera.position)) * CAMERA_SPEED, 1)
+        camera_speed = min(np.linalg.norm(
+            target_position - np.array(self.camera.position)) * CAMERA_SPEED, 1)
 
         self.camera.move_to(tuple(target_position), camera_speed)
 
@@ -152,10 +170,11 @@ class GameWindow(arcade.Window):
             case arcade.key.S:
                 self.s_pressed = False
             case arcade.key.D:
-                self.d_pressed = False 
+                self.d_pressed = False
 
     def on_update(self, delta_time):
-        self.camera.move((self.player_sprite.center_x-self.width/2, self.player_sprite.center_y-self.height/2))
+        self.camera.move((self.player_sprite.center_x-self.width/2,
+                         self.player_sprite.center_y-self.height/2))
 
         impulse, angle = self.controller.pollAxis()
 
@@ -163,7 +182,8 @@ class GameWindow(arcade.Window):
 
         if player_on_ground:
             self.delta_v = min(self.delta_v+DELTA_DELTAV, MAX_DELTAV)
-            if self.debug: print(self.delta_v)
+            if self.debug:
+                print(self.delta_v)
 
         if self.delta_v > 0 and impulse != 0:
             vector = np.zeros((2))
@@ -172,24 +192,35 @@ class GameWindow(arcade.Window):
             vector *= impulse * min(self.delta_v, PLAYER_ACCELERATION)
 
             sub = min(self.delta_v, np.sum(np.abs(vector)))
-            self.delta_v = self.delta_v - sub
-            if self.debug: print(self.delta_v, np.sum(vector), sub)
-            
-            self.physics_engine.apply_force(self.player_sprite, tuple(vector))
+            self.delta_v = self.delta_v - \
+                sub
+            if self.debug:
+                print(self.delta_v, np.sum(vector), sub)
 
+            self.physics_engine.apply_force(self.player_sprite, tuple(vector))
 
         if self.debug:
             n_directions = self.w_pressed + self.a_pressed + self.s_pressed + self.d_pressed
             if n_directions != 0 and self.delta_v > 0:
-                if self.w_pressed: self.yeet_force[1] += min(self.delta_v/n_directions, PLAYER_ACCELERATION)
-                if self.a_pressed: self.yeet_force[0] -= min(self.delta_v/n_directions, PLAYER_ACCELERATION)
-                if self.s_pressed: self.yeet_force[1] -= min(self.delta_v/n_directions, PLAYER_ACCELERATION)
-                if self.d_pressed: self.yeet_force[0] += min(self.delta_v/n_directions, PLAYER_ACCELERATION)
+                if self.w_pressed:
+                    self.yeet_force[1] += min(self.delta_v /
+                                              n_directions, PLAYER_ACCELERATION)
+                if self.a_pressed:
+                    self.yeet_force[0] -= min(self.delta_v /
+                                              n_directions, PLAYER_ACCELERATION)
+                if self.s_pressed:
+                    self.yeet_force[1] -= min(self.delta_v /
+                                              n_directions, PLAYER_ACCELERATION)
+                if self.d_pressed:
+                    self.yeet_force[0] += min(self.delta_v /
+                                              n_directions, PLAYER_ACCELERATION)
                 self.delta_v -= min(self.delta_v, PLAYER_ACCELERATION)
-                if self.debug: print(self.delta_v, self.yeet_force)
+                if self.debug:
+                    print(self.delta_v, self.yeet_force)
 
-                self.physics_engine.apply_force(self.player_sprite, tuple(self.yeet_force))
-                self.yeet_force = [0,0]
+                self.physics_engine.apply_force(
+                    self.player_sprite, tuple(self.yeet_force))
+                self.yeet_force = [0, 0]
 
         self.physics_engine.step()
 
@@ -205,4 +236,5 @@ class GameWindow(arcade.Window):
         self.background_accents.draw()
         self.wall_elements.draw()
         self.finish_list.draw()
+        self.bottles.draw()
         self.player_list.draw()

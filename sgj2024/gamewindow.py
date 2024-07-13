@@ -239,17 +239,17 @@ class GameWindow(arcade.Window):
             if n_directions != 0 and self.delta_v > 0:
                 if self.w_pressed:
                     self.yeet_force[1] += min(self.delta_v /
-                                              n_directions, PLAYER_GROUND_ACCELERATION)
+                                              n_directions, PLAYER_JETPACK_ACCELERATION)
                 if self.a_pressed:
                     self.yeet_force[0] -= min(self.delta_v /
-                                              n_directions, PLAYER_GROUND_ACCELERATION)
+                                              n_directions, PLAYER_JETPACK_ACCELERATION)
                 if self.s_pressed:
                     self.yeet_force[1] -= min(self.delta_v /
-                                              n_directions, PLAYER_GROUND_ACCELERATION)
+                                              n_directions, PLAYER_JETPACK_ACCELERATION)
                 if self.d_pressed:
                     self.yeet_force[0] += min(self.delta_v /
-                                              n_directions, PLAYER_GROUND_ACCELERATION)
-                self.delta_v -= min(self.delta_v, PLAYER_GROUND_ACCELERATION)
+                                              n_directions, PLAYER_JETPACK_ACCELERATION)
+                self.delta_v -= min(self.delta_v, PLAYER_JETPACK_ACCELERATION)
                 if self.debug:
                     print(self.delta_v, self.yeet_force)
 

@@ -36,6 +36,10 @@ class GameWindow(arcade.Window):
         self.player_list.append(self.player_sprite)
         self.load_level(1)
 
+    def cleanup(self):
+        """Cleanup (like stopping our interfaces)"""
+        pass
+
     def load_level(self, level):
         if self.debug:
             print(f"Debug: Loading Level: {level}")

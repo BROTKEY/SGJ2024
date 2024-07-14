@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.10" tiledversion="1.11.0" name="SGJ24Tileset" tilewidth="512" tileheight="1024" tilecount="23" columns="0">
+<tileset version="1.10" tiledversion="1.11.0" name="SGJ24Tileset" tilewidth="512" tileheight="1024" tilecount="24" columns="0">
  <grid orientation="orthogonal" width="1" height="1"/>
  <tile id="0">
   <image source="SGJ24TILES/asset1.png" width="256" height="256"/>
@@ -83,5 +83,8 @@
  </tile>
  <tile id="53">
   <image source="SGJ24TILES/waterfall_bottom_2.png" width="256" height="256"/>
+ </tile>
+ <tile id="54">
+  <image source="SGJ24TILES/waterfall_midng.png" width="256" height="256"/>
  </tile>
 </tileset>

@@ -107,7 +107,7 @@ class GameWindow(arcade.Window):
         self.whistle_controller.start()
         self.controller = self.xinput_controller
 
-        self.theme = arcade.load_sound('assets/sound/music.mp3')
+        self.theme = arcade.load_sound('assets/sound/music.wav')
 
         self.load_level(1)
 

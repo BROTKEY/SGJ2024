@@ -99,7 +99,7 @@ class GameWindow(arcade.Window):
         self.controller = XInputController()
         self.controller.start()
 
-        self.theme = arcade.load_sound('assets/sound/music.mp3')
+        self.theme = arcade.load_sound('assets/sound/music.wav')
 
         self.load_level(1)
 

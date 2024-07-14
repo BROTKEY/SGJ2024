@@ -336,12 +336,11 @@ class GameWindow(arcade.Window):
         for bottle in mark_delete:
             self.active_bottles.pop(bottle)
 
-        if self.player_sprite.position[0] < 60:
-            self.physics_engine.set_position(
-                self.player_sprite, (60, self.player_sprite.position[1]))
-        elif self.player_sprite.position[0] > self.map_bounds_x-60:
-            self.physics_engine.set_position(
-                self.player_sprite, (self.map_bounds_x-60, self.player_sprite.position[1]))
+        if self.player_sprite.position[0] < self.player_sprite.width/2 or self.player_sprite.position[0] > self.map_bounds_x - self.player_sprite.width/2:
+            velocity = np.array(self.physics_engine.get_physics_object(self.player_sprite).body.velocity)
+            velocity[0] *= MAP_BOUNDS_BOUNCE * -1
+            self.physics_engine.set_velocity(self.player_sprite, tuple(velocity))
+            if self.debug: print(f"Bounce! {velocity}")
 
         self.scroll_to_player()
 

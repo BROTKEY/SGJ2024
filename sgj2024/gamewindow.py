@@ -16,7 +16,7 @@ LEVELS = {
         "tilemap": arcade.load_tilemap("assets/TEST.json", SPRITE_SCALING_TILES)
     },
     1: {
-        "tilemap": arcade.load_tilemap("assets/Level1.json", SPRITE_SCALING_TILES)
+        "tilemap": arcade.load_tilemap("assets/vertical.json", SPRITE_SCALING_TILES)
     }
 }
 
@@ -27,21 +27,23 @@ class GameWindow(arcade.Window):
         self.debug = debug
 
         self.current_level = 1
+        self.on_water = False
         self.background_elements: Optional[arcade.SpriteList] = None
         self.background_accents: Optional[arcade.SpriteList] = None
         self.wall_elements: Optional[arcade.SpriteList] = None
         self.bottles: Optional[arcade.SpriteList] = None
         self.cacti: Optional[arcade.SpriteList] = None
+        self.water: Optional[arcade.SpriteList] = None
 
         self.physics_engine: Optional[arcade.PymunkPhysicsEngine] = None
         self.player_sprite = None
-        
+
         self.start_sprite: Optional[arcade.Sprite] = None
         self.finish_sprite: Optional[arcade.Sprite] = None
         self.finish_list: Optional[arcade.SpriteList] = None
 
         self.yeet_force = [0, 0]
-        self.delta_v = 0
+        self.delta_v = MAX_DELTAV
         self.w_pressed = False
         self.a_pressed = False
         self.s_pressed = False
@@ -62,13 +64,13 @@ class GameWindow(arcade.Window):
         self.finish_list = arcade.SpriteList()
 
         self.bottle_00_texture = arcade.load_texture(
-                "assets/SGJ24TILES/not_yet_sploding_cola.png"
+            "assets/SGJ24TILES/not_yet_sploding_cola.png"
         )
         self.bottle_01_texture = arcade.load_texture(
-                "assets/SGJ24TILES/sploding_cola_1.png"
+            "assets/SGJ24TILES/sploding_cola_1.png"
         )
         self.bottle_02_texture = arcade.load_texture(
-                "assets/SGJ24TILES/sploding_cola_2.png"
+            "assets/SGJ24TILES/sploding_cola_2.png"
         )
 
         self.controller = XInputController()
@@ -93,7 +95,7 @@ class GameWindow(arcade.Window):
 
         self.start_sprite = tile_map.sprite_lists["Spawn"][0]
         self.player_sprite.set_position(*self.
-            start_sprite.position)
+                                        start_sprite.position)
 
         self.finish_sprite = tile_map.sprite_lists["Finish"][0]
         self.finish_list.append(self.finish_sprite)
@@ -103,6 +105,7 @@ class GameWindow(arcade.Window):
         self.wall_elements = tile_map.sprite_lists["Platforms"]
         self.bottles = tile_map.sprite_lists["Bottles"]
         self.cacti = tile_map.sprite_lists["Cacti"]
+        self.water = tile_map.sprite_lists["Water"]
 
         self.physics_engine = arcade.PymunkPhysicsEngine(
             damping=PHYSICS_DAMPING, gravity=(0, -PHYSICS_GRAVITY))
@@ -124,29 +127,49 @@ class GameWindow(arcade.Window):
         self.physics_engine.add_sprite(self.finish_sprite,
                                        collision_type="finish",
                                        body_type=arcade.PymunkPhysicsEngine.STATIC,
-        )
+                                       )
 
-        self.physics_engine.add_sprite_list(self.cacti, collision_type="cacti", body_type=arcade.PymunkPhysicsEngine.STATIC)
+        self.physics_engine.add_sprite_list(
+            self.cacti, collision_type="cacti", body_type=arcade.PymunkPhysicsEngine.STATIC)
 
         self.physics_engine.add_sprite_list(
             self.bottles, friction=WALL_FRICTION, collision_type="bottle", body_type=arcade.PymunkPhysicsEngine.STATIC)
-        
-        self.physics_engine.add_collision_handler("player", "bottle", self.bottle_colision_handler)
 
-        self.physics_engine.add_collision_handler("player", "cacti", self.cacti_colision_handler)
+        self.physics_engine.add_sprite_list(
+            self.water, collision_type="water", body_type=arcade.PymunkPhysicsEngine.STATIC)
 
-        self.physics_engine.add_collision_handler("player", "finish", begin_handler=self.level_finished)
+        self.physics_engine.add_collision_handler(
+            "player", "bottle", self.bottle_colision_handler)
+
+        self.physics_engine.add_collision_handler(
+            "player", "cacti", self.cacti_colision_handler)
+
+        self.physics_engine.add_collision_handler(
+            "player", "finish", begin_handler=self.level_finished)
+
+        self.physics_engine.add_collision_handler(
+            "player", "water", pre_handler=self.water_colision_handler, separate_handler=self.water_post_colision_handler)
 
     def level_finished(self, _0, _1, _2, _3, _4):
-        if self.debug: print("Level Finished!")
+        if self.debug:
+            print("Level Finished!")
         return False
 
+    def water_colision_handler(self, player_sprite: PlayerSprite, water_sprite: arcade.Sprite, _2, _3, _4):
+        self.on_water = True
+        return False
+
+    def water_post_colision_handler(self, _0, _1, _2, _3, _4):
+        self.on_water = False
+
     def cacti_colision_handler(self, player_sprite: PlayerSprite, cacti_sprite: arcade.Sprite, arbiter: pymunk.Arbiter, space, data):
-        velocity = self.physics_engine.get_physics_object(self.player_sprite).body.velocity
+        velocity = self.physics_engine.get_physics_object(
+            self.player_sprite).body.velocity
         counterforce = np.array(velocity) * -1
         print(velocity)
         print(counterforce)
-        self.physics_engine.set_velocity(self.player_sprite, tuple(counterforce))
+        self.physics_engine.set_velocity(
+            self.player_sprite, tuple(counterforce))
         return True
 
     def bottle_colision_handler(self, player_sprite: PlayerSprite, bottle_sprite: arcade.Sprite, arbiter: pymunk.Arbiter, space, data):
@@ -154,10 +177,11 @@ class GameWindow(arcade.Window):
         vector[1] = np.cos(bottle_sprite.radians)
         vector[0] = -np.sin(bottle_sprite.radians)
 
-        self.physics_engine.apply_force(player_sprite, tuple(vector * BOTTLE_ACCELERATION))
+        self.physics_engine.apply_force(
+            player_sprite, tuple(vector * BOTTLE_ACCELERATION))
 
         self.active_bottles[bottle_sprite] = 90
-        
+
         return False
 
     def scroll_to_player(self):
@@ -212,18 +236,22 @@ class GameWindow(arcade.Window):
         impulse, angle = self.controller.pollAxis()
 
         player_on_ground = self.physics_engine.is_on_ground(self.player_sprite)
-    
+
         self.player_sprite.pymunk.max_horizontal_velocity = PLAYER_MAX_HORIZONTAL_VELOCITY if player_on_ground else PLAYER_MAX_HORIZONTAL_AIR_VELOCITY
 
-        if player_on_ground:
+        if self.on_water:
             self.delta_v = min(self.delta_v+DELTA_DELTAV, MAX_DELTAV)
 
         if impulse != 0:
             vector = np.zeros((2))
             vector[0] = np.cos(angle)
-            vector[1] = np.sin(angle) * (not player_on_ground or ((angle > 0.3 or angle < -0.3) and (angle > -2.8 or angle < 2.8)))
-            vector[0] *= impulse * min(self.delta_v, PLAYER_GROUND_ACCELERATION if player_on_ground else PLAYER_JETPACK_ACCELERATION if self.delta_v > 0 else PLAYER_AIR_ACCELERATION)
-            vector[1] *= impulse * min(self.delta_v, PLAYER_JETPACK_ACCELERATION)
+            vector[1] = np.sin(angle) * (not player_on_ground or ((angle >
+                                                                   0.3 or angle < -0.3) and (angle > -2.8 or angle < 2.8)))
+            vector[0] *= impulse * \
+                min(self.delta_v if not player_on_ground else PLAYER_GROUND_ACCELERATION, PLAYER_GROUND_ACCELERATION if player_on_ground else PLAYER_JETPACK_ACCELERATION if self.delta_v >
+                    0 else PLAYER_AIR_ACCELERATION)
+            vector[1] *= impulse * \
+                min(self.delta_v, PLAYER_JETPACK_ACCELERATION)
 
             sub = min(self.delta_v, np.sum(np.abs(vector)))
             self.delta_v = self.delta_v - (0 if player_on_ground else sub)
@@ -256,14 +284,15 @@ class GameWindow(arcade.Window):
                 self.physics_engine.apply_force(
                     self.player_sprite, tuple(self.yeet_force))
                 yeet_angle = np.atan2(*self.yeet_force)
-                yeet_strength = np.linalg.norm(self.yeet_force) / np.linalg.norm((PLAYER_JETPACK_ACCELERATION, PLAYER_JETPACK_ACCELERATION))
+                yeet_strength = np.linalg.norm(self.yeet_force) / np.linalg.norm(
+                    (PLAYER_JETPACK_ACCELERATION, PLAYER_JETPACK_ACCELERATION))
                 self.yeet_force = [0, 0]
 
         self.physics_engine.step()
 
         self.player_sprite.update(angle, impulse, self.delta_v / MAX_DELTAV)
         # if self.debug and yeet_strength > 0:
-            # self.player_sprite.update(-yeet_angle, yeet_strength, self.delta_v / MAX_DELTAV)
+        # self.player_sprite.update(-yeet_angle, yeet_strength, self.delta_v / MAX_DELTAV)
 
         mark_delete = []
         for bottle, timer in self.active_bottles.items():
@@ -279,8 +308,12 @@ class GameWindow(arcade.Window):
         for bottle in mark_delete:
             self.active_bottles.pop(bottle)
 
-        if self.player_sprite.position[0] < 60: self.physics_engine.set_position(self.player_sprite, (60, self.player_sprite.position[1]))
-        elif self.player_sprite.position[0] > self.map_bounds_x-60: self.physics_engine.set_position(self.player_sprite, (self.map_bounds_x-60, self.player_sprite.position[1]))
+        if self.player_sprite.position[0] < 60:
+            self.physics_engine.set_position(
+                self.player_sprite, (60, self.player_sprite.position[1]))
+        elif self.player_sprite.position[0] > self.map_bounds_x-60:
+            self.physics_engine.set_position(
+                self.player_sprite, (self.map_bounds_x-60, self.player_sprite.position[1]))
 
         self.scroll_to_player()
 
@@ -289,9 +322,10 @@ class GameWindow(arcade.Window):
         self.camera.use()
 
         self.background_elements.draw()
+        self.bottles.draw()
+        self.cacti.draw()
+        self.water.draw()
         self.background_accents.draw()
         self.wall_elements.draw()
         self.finish_list.draw()
-        self.bottles.draw()
-        self.cacti.draw()
         self.player_sprite.draw()

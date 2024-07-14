@@ -345,7 +345,7 @@ class GameWindow(arcade.Window):
             vector[1] *= impulse * \
                 min(self.delta_v, PLAYER_JETPACK_ACCELERATION)
 
-            sub = min(self.delta_v, np.sum(np.abs(vector)))
+            sub = min(self.delta_v, np.sum(np.abs(vector*np.array([1, 2]))))
             self.delta_v = self.delta_v - \
                 (0 if player_on_ground else sub)
             if self.debug:

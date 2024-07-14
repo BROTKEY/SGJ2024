@@ -113,8 +113,8 @@ class DirectionIndicator(arcade.Sprite):
         super().draw()
 
 class BackgroundSprite(arcade.Sprite):
-    def __init__(self):
+    def __init__(self, tile_width):
         super().__init__()
         
         self.texture = arcade.load_texture("assets/SGJ24TILES/Background.png")
-        self.scale = 14
+        self.scale = tile_width*2

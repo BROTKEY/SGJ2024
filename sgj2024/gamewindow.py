@@ -95,7 +95,7 @@ class GameWindow(arcade.Window):
         self.camera = arcade.Camera(self.width, self.height, self)
         self.background_camera = arcade.Camera(self.width, self.height, self)
 
-        self.background_sprite = BackgroundSprite()
+        self.background_sprite = BackgroundSprite(tile_map.width*SPRITE_SCALING_TILES)
 
         self.start_sprite = tile_map.sprite_lists["Spawn"][0]
         self.player_sprite.set_position(*self.

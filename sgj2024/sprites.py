@@ -111,3 +111,10 @@ class DirectionIndicator(arcade.Sprite):
         P += pos
 
         super().draw()
+
+class BackgroundSprite(arcade.Sprite):
+    def __init__(self):
+        super().__init__()
+        
+        self.texture = arcade.load_texture("assets/SGJ24TILES/Background.png")
+        self.scale = 14

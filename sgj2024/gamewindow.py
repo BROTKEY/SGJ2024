@@ -356,10 +356,10 @@ class GameWindow(arcade.Window):
         self.camera.use()
 
         self.background_elements.draw()
-        self.bottles.draw()
-        self.cacti.draw()
         self.water.draw()
         self.background_accents.draw()
+        self.bottles.draw()
+        self.cacti.draw()
         self.wall_elements.draw()
         self.icy_elements.draw()
         self.finish_list.draw()

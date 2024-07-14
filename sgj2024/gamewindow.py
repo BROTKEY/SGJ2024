@@ -1,8 +1,10 @@
 import arcade
 from typing import Optional
+import arcade.key
 import numpy as np
 import pymunk
 import time
+import pyglet.media
 
 from sgj2024.sprites import PlayerSprite, BackgroundSprite
 from sgj2024.config import *
@@ -48,6 +50,7 @@ class GameWindow(arcade.Window):
         self.a_pressed = False
         self.s_pressed = False
         self.d_pressed = False
+        self.m_pressed = False
         self.space_pressed = False
         self.backspace_pressed = False
 
@@ -58,6 +61,11 @@ class GameWindow(arcade.Window):
         self.active_bottles = {}
 
         self.controller: Optional[BaseController] = None
+
+        self.theme: Optional[arcade.Sound] = None
+        self.music_player: Optional[pyglet.media.Player] = None
+        self.muted: bool = False
+
 
     def setup(self):
         arcade.set_background_color((140, 0, 255))
@@ -77,6 +85,8 @@ class GameWindow(arcade.Window):
 
         self.controller = XInputController()
         self.controller.start()
+
+        self.theme = arcade.load_sound('assets/sound/music.mp3')
 
         self.load_level(1)
 
@@ -158,6 +168,10 @@ class GameWindow(arcade.Window):
 
         self.physics_engine.add_collision_handler(
             "player", "water", pre_handler=self.water_colision_handler, separate_handler=self.water_post_colision_handler)
+        
+        self.music_player = arcade.play_sound(self.theme, looping=True, volume=0.0 if self.muted else 1.0)
+
+
 
     def level_finished(self, _0, _1, _2, _3, _4):
         if self.debug:
@@ -232,6 +246,12 @@ class GameWindow(arcade.Window):
                 self.space_pressed = True
             case arcade.key.BACKSPACE:
                 self.backspace_pressed = True
+            case arcade.key.M:
+                if not self.m_pressed:
+                    self.m_pressed = True
+                    self.muted = not self.muted
+                    self.music_player.volume = 0 if self.muted else 1
+
 
     def on_key_release(self, key, modifiers):
         match key:
@@ -247,6 +267,8 @@ class GameWindow(arcade.Window):
                 self.space_pressed = False
             case arcade.key.BACKSPACE:
                 self.backspace_pressed = False
+            case arcade.key.M:
+                self.m_pressed = False
 
     def on_update(self, delta_time):
         self.camera.move((self.player_sprite.center_x-self.width/2,

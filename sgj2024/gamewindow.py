@@ -11,6 +11,7 @@ from sgj2024.config import *
 from sgj2024.interfaces.baseController import BaseController
 from sgj2024.interfaces.xInputController import XInputController
 from sgj2024.interfaces.whistleController import WhistleController
+from sgj2024.interfaces.hybridController import HybridController
 
 
 LEVELS = {
@@ -58,6 +59,9 @@ class GameWindow(arcade.Window):
         self.m_pressed = False
         self.space_pressed = False
         self.backspace_pressed = False
+        self.f1_pressed = False
+        self.f2_pressed = False
+        self.f3_pressed = False
 
         self.bottle_00_texture: Optional[arcade.texture.Texture] = None
         self.bottle_01_texture: Optional[arcade.texture.Texture] = None
@@ -71,6 +75,8 @@ class GameWindow(arcade.Window):
         self.birb_up = True
 
         self.controller: Optional[BaseController] = None
+        self.xinput_controller: Optional[XInputController] = None
+        self.whistle_controller: Optional[WhistleController] = None
 
         self.theme: Optional[arcade.Sound] = None
         self.music_player: Optional[pyglet.media.Player] = None
@@ -96,8 +102,15 @@ class GameWindow(arcade.Window):
                               arcade.load_texture('assets/SGJ24TILES/birb_low.png')]
 
 
-        self.controller = XInputController()
-        self.controller.start()
+        self.xinput_controller = XInputController()
+        self.xinput_controller.start()
+        self.whistle_controller = WhistleController()
+        self.whistle_controller.start()
+        self.hybrid_controller = HybridController(self.whistle_controller, self.xinput_controller)
+        self.hybrid_controller.start()
+        
+        self.controller = self.xinput_controller
+        # self.controller.start()
 
         self.theme = arcade.load_sound('assets/sound/music.wav')
 
@@ -105,7 +118,10 @@ class GameWindow(arcade.Window):
 
     def cleanup(self):
         """Cleanup (like stopping our interfaces)"""
-        self.controller.stop()
+        self.xinput_controller.stop()
+        self.whistle_controller.stop()
+        # self.hybrid_controller.stop()
+        # self.controller.stop()
 
     def move_player_to_spawn(self, spawn_id):
         if spawn_id < len(self.start_sprites):
@@ -298,6 +314,24 @@ class GameWindow(arcade.Window):
                     self.m_pressed = True
                     self.muted = not self.muted
                     self.music_player.volume = 0 if self.muted else 1
+            case arcade.key.F1:
+                if not self.f1_pressed and self.controller != self.xinput_controller:
+                    self.f1_pressed = True
+                    # self.controller.stop()
+                    self.controller = self.xinput_controller
+                    # self.controller.start()
+            case arcade.key.F2:
+                if not self.f2_pressed and self.controller != self.whistle_controller:
+                    self.f2_pressed = True
+                    # self.controller.stop()
+                    self.controller = self.whistle_controller
+                    # self.controller.start()
+            case arcade.key.F3:
+                if not self.f3_pressed and self.controller != self.hybrid_controller:
+                    self.f3_pressed = True
+                    # self.controller.stop()
+                    self.controller = self.hybrid_controller
+                    # self.controller.start()
             case num if key >= 48 and key <=57:
                 if self.debug:
                     self.move_player_to_spawn(key-48)
@@ -318,6 +352,12 @@ class GameWindow(arcade.Window):
                 self.backspace_pressed = False
             case arcade.key.M:
                 self.m_pressed = False
+            case arcade.key.F1:
+                self.f1_pressed = False
+            case arcade.key.F2:
+                self.f2_pressed = False
+            case arcade.key.F3:
+                self.f3_pressed = False
 
     def on_update(self, delta_time):
         self.camera.move((self.player_sprite.center_x-self.width/2,

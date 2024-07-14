@@ -13,21 +13,8 @@ class XInputController(BaseController):
         self.impulse = 0
         self.is_windows = 'windows' in platform().lower()
 
-    def unit_vector(self, vector):
 
-        """ Returns the unit vector of the vector.  """
-        return vector / np.linalg.norm(vector)
-
-    def angle_between(self, v1, v2):
-        _, ly = v1
-        v1_u = self.unit_vector(v1)
-        v2_u = self.unit_vector(v2)
-        side = 1 if ly < 0 else -1
-        if self.is_windows:
-            side = -side
-        return np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0)) / side
-
-    def start(self):
+    def start(self) -> None:
         self.manager = input.ControllerManager()
         controllers = self.manager.get_controllers()
         print(controllers)
@@ -43,7 +30,26 @@ class XInputController(BaseController):
         @self.manager.event
         def on_disconnect(controller):
             self.controller.close()
-        
+
+    def stop(self) -> None:
+        self.manager.remove_handlers()
+        self.controller.close()
+
+
+    def unit_vector(self, vector):
+
+        """ Returns the unit vector of the vector.  """
+        return vector / np.linalg.norm(vector)
+
+    def angle_between(self, v1, v2):
+        _, ly = v1
+        v1_u = self.unit_vector(v1)
+        v2_u = self.unit_vector(v2)
+        side = 1 if ly < 0 else -1
+        if self.is_windows:
+            side = -side
+        return np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0)) / side
+
 
     def getAnalogAxis(self, delta_time):
         try:

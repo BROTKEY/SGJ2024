@@ -24,7 +24,6 @@ class WhistleController(BaseController):
         self.vol_min = 0.3
         self.vol_max = 30
 
-        self.thread = Thread(target=self)
 
 
     def __call__(self):
@@ -56,6 +55,7 @@ class WhistleController(BaseController):
             self.freq = np.average(freq_hist)
 
     def start(self):
+        self.thread = Thread(target=self)
         self.thread.start()
             
     def stop(self):

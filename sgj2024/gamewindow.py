@@ -244,6 +244,7 @@ class GameWindow(arcade.Window):
 
         if self.on_water:
             self.delta_v = min(self.delta_v+DELTA_DELTAV, MAX_DELTAV)
+            if self.debug: print(self.delta_v)
 
         if impulse != 0:
             vector = np.zeros((2))
@@ -251,7 +252,7 @@ class GameWindow(arcade.Window):
             vector[1] = np.sin(angle) * (not player_on_ground or ((angle >
                                                                    0.3 or angle < -0.3) and (angle > -2.8 or angle < 2.8)))
             vector[0] *= impulse * \
-                min(self.delta_v, PLAYER_GROUND_ACCELERATION if player_on_ground else PLAYER_JETPACK_ACCELERATION if self.delta_v >
+                min(self.delta_v if not player_on_ground else PLAYER_GROUND_ACCELERATION, PLAYER_GROUND_ACCELERATION if player_on_ground else PLAYER_JETPACK_ACCELERATION if self.delta_v >
                     0 else PLAYER_AIR_ACCELERATION)
             vector[1] *= impulse * \
                 min(self.delta_v, PLAYER_JETPACK_ACCELERATION)

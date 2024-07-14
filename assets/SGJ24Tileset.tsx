@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.10" tiledversion="1.10.2" name="SGJ24Tileset" tilewidth="512" tileheight="1024" tilecount="34" columns="0">
+<tileset version="1.8" tiledversion="1.8.0" name="SGJ24Tileset" tilewidth="768" tileheight="1024" tilecount="38" columns="0">
  <grid orientation="orthogonal" width="1" height="1"/>
  <tile id="0">
   <image width="256" height="256" source="SGJ24TILES/asset1.png"/>
@@ -121,5 +121,27 @@
  </tile>
  <tile id="64">
   <image width="256" height="256" source="SGJ24TILES/Spawn.png"/>
+ </tile>
+ <tile id="65">
+  <image width="256" height="256" source="SGJ24TILES/Crate_winter.png"/>
+ </tile>
+ <tile id="66">
+  <image width="256" height="256" source="SGJ24TILES/le_crate.png"/>
+ </tile>
+ <tile id="67">
+  <image width="768" height="768" source="SGJ24TILES/big_tree.png"/>
+  <objectgroup draworder="index" id="3">
+   <object id="2" x="1" y="1">
+    <polygon points="0,0 767,-1 767,176 452,193 33,141 -2,118"/>
+   </object>
+  </objectgroup>
+ </tile>
+ <tile id="68">
+  <image width="768" height="768" source="SGJ24TILES/tree_2.png"/>
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="37" y="54">
+    <polygon points="0,0 189,-55 677,-42 732,29 714,223 564,285 13,233 -38,138"/>
+   </object>
+  </objectgroup>
  </tile>
 </tileset>

@@ -242,7 +242,7 @@ class GameWindow(arcade.Window):
 
         self.player_sprite.pymunk.max_horizontal_velocity = PLAYER_MAX_HORIZONTAL_VELOCITY if player_on_ground else PLAYER_MAX_HORIZONTAL_AIR_VELOCITY
 
-        if player_on_ground and self.on_water:
+        if self.on_water:
             self.delta_v = min(self.delta_v+DELTA_DELTAV, MAX_DELTAV)
 
         if impulse != 0:

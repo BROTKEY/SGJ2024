@@ -35,6 +35,9 @@ class GameWindow(arcade.Window):
         self.bottles: Optional[arcade.SpriteList] = None
         self.cacti: Optional[arcade.SpriteList] = None
         self.water: Optional[arcade.SpriteList] = None
+        self.birb_list: Optional[arcade.SpriteList] = None
+
+        self.birb_grab: Optional[arcade.Sprite] = None
 
         self.physics_engine: Optional[arcade.PymunkPhysicsEngine] = None
         self.player_sprite = None
@@ -124,6 +127,7 @@ class GameWindow(arcade.Window):
         self.bottles = tile_map.sprite_lists["Bottles"]
         self.cacti = tile_map.sprite_lists["Cacti"]
         self.water = tile_map.sprite_lists["Water"]
+        self.birb_list = tile_map.sprite_lists["Birb"]
 
         self.physics_engine = arcade.PymunkPhysicsEngine(
             damping=PHYSICS_DAMPING, gravity=(0, -PHYSICS_GRAVITY))
@@ -166,6 +170,10 @@ class GameWindow(arcade.Window):
         self.physics_engine.add_sprite_list(
             self.water, collision_type="water", body_type=arcade.PymunkPhysicsEngine.STATIC)
 
+        self.physics_engine.add_sprite_list(
+                self.birb_list, collision_type="birb", body_type=arcade.PymunkPhysicsEngine.KINEMATIC
+                )
+
         self.physics_engine.add_collision_handler(
             "player", "bottle", self.bottle_colision_handler)
 
@@ -177,7 +185,11 @@ class GameWindow(arcade.Window):
 
         self.physics_engine.add_collision_handler(
             "player", "water", pre_handler=self.water_colision_handler, separate_handler=self.water_post_colision_handler)
-    
+
+        self.physics_engine.add_collision_handler(
+                "player", "birb", self.birb_collision_handler
+                )
+
         self.move_player_to_spawn(0)
 
     def level_finished(self, _0, _1, _2, _3, _4):
@@ -213,6 +225,12 @@ class GameWindow(arcade.Window):
 
         self.active_bottles[bottle_sprite] = 90
 
+        return False
+
+    def birb_collision_handler(self, player_sprite, birb_sprite, arbiter, space, data):
+        if self.birb_timer == 0:
+            self.birb_timer = BIRB_TIMER
+            self.birb_grab = birb_sprite
         return False
 
     def scroll_to_player(self):
@@ -282,6 +300,10 @@ class GameWindow(arcade.Window):
 
         self.player_sprite.pymunk.max_horizontal_velocity = PLAYER_MAX_HORIZONTAL_VELOCITY if player_on_ground else PLAYER_MAX_HORIZONTAL_AIR_VELOCITY
 
+        if self.birb_timer > 0 :
+
+            self.birb_timer -= 1
+
 
         if self.on_water:
             self.delta_v = min(self.delta_v+DELTA_DELTAV, MAX_DELTAV)
@@ -341,6 +363,11 @@ class GameWindow(arcade.Window):
             velocity[0] *= MAP_BOUNDS_BOUNCE * -1
             self.physics_engine.set_velocity(self.player_sprite, tuple(velocity))
             if self.debug: print(f"Bounce! {velocity}")
+        
+        for birb in self.birb_list:
+            self.physics_engine.set_position(birb, (birb.position[0]-BIRB_SPEED, birb.position[1]))
+            if birb.position[0] < 0:
+                self.physics_engine.set_position(birb, (self.map_bounds_x, birb.position[1]))
 
         self.scroll_to_player()
 
@@ -361,3 +388,12 @@ class GameWindow(arcade.Window):
         self.icy_elements.draw()
         self.finish_list.draw()
         self.player_sprite.draw()
+        self.birb_list.draw()
+        for birb in self.birb_list:
+            x, y = birb.position
+            x += self.map_bounds_x
+            birb.position = (x,y)
+            birb.draw()
+            x -= self.map_bounds_x * 2
+            birb.position = (x,y)
+            birb.draw()

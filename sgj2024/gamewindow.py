@@ -4,7 +4,7 @@ import numpy as np
 import pymunk
 import time
 
-from sgj2024.sprites import PlayerSprite
+from sgj2024.sprites import PlayerSprite, BackgroundSprite
 from sgj2024.config import *
 from sgj2024.interfaces.baseController import BaseController
 from sgj2024.interfaces.xInputController import XInputController
@@ -93,6 +93,9 @@ class GameWindow(arcade.Window):
         self.map_bounds_y = tile_map.height * tile_map.tile_height * tile_map.scaling
 
         self.camera = arcade.Camera(self.width, self.height, self)
+        self.background_camera = arcade.Camera(self.width, self.height, self)
+
+        self.background_sprite = BackgroundSprite()
 
         self.start_sprite = tile_map.sprite_lists["Spawn"][0]
         self.player_sprite.set_position(*self.
@@ -100,6 +103,7 @@ class GameWindow(arcade.Window):
 
         self.finish_sprite = tile_map.sprite_lists["Finish"][0]
         self.finish_list.append(self.finish_sprite)
+
 
         self.background_elements = tile_map.sprite_lists["Background"]
         self.background_accents = tile_map.sprite_lists["BackgroundAccents"]
@@ -211,6 +215,7 @@ class GameWindow(arcade.Window):
             target_position - np.array(self.camera.position)) * CAMERA_SPEED, 1)
 
         self.camera.move_to(tuple(target_position), camera_speed)
+        self.background_camera.move_to((0, target_position[1]*CAMERA_PARALLAX), camera_speed)
 
     def on_key_press(self, key, modifiers):
         match key:
@@ -311,6 +316,10 @@ class GameWindow(arcade.Window):
 
     def on_draw(self):
         self.clear()
+        
+        self.background_camera.use()
+        self.background_sprite.draw()
+
         self.camera.use()
 
         self.background_elements.draw()

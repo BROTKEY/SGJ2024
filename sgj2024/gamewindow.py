@@ -60,7 +60,12 @@ class GameWindow(arcade.Window):
         self.bottle_01_texture: Optional[arcade.texture.Texture] = None
         self.bottle_02_texture: Optional[arcade.texture.Texture] = None
 
+        self.birb_textures: list[arcade.Texture] = []
+
         self.active_bottles = {}
+        
+        self.birb_flap_timer = time.time()
+        self.birb_up = True
 
         self.controller: Optional[BaseController] = None
 
@@ -79,6 +84,9 @@ class GameWindow(arcade.Window):
         self.bottle_02_texture = arcade.load_texture(
             "assets/SGJ24TILES/sploding_cola_2.png"
         )
+        self.birb_textures = [arcade.load_texture('assets/SGJ24TILES/eee53f1bae834b35.png'),
+                              arcade.load_texture('assets/SGJ24TILES/birb_low.png')]
+
 
         self.controller = XInputController()
         self.controller.start()
@@ -359,6 +367,13 @@ class GameWindow(arcade.Window):
             if timer == 0:
                 bottle.texture = self.bottle_00_texture
                 mark_delete.append(bottle)
+
+        # t = time.time()
+        if time.time() > self.birb_flap_timer:
+            self.birb_up = not self.birb_up
+            for birb in self.birb_list:
+                birb.texture = self.birb_textures[int(self.birb_up)]
+            self.birb_flap_timer += 1
 
         for bottle in mark_delete:
             self.active_bottles.pop(bottle)

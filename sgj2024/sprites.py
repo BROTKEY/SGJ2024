@@ -7,7 +7,7 @@ class PlayerSprite(arcade.Sprite):
     def __init__(self):
         super().__init__()
 
-        self.texture = arcade.load_texture("assets/player/cat.png")
+        self.texture = arcade.load_texture("assets/player/Penguin.png")
         self.scale = SPRITE_SCALING_PLAYER
         self.fuel = 0.0
 
@@ -23,22 +23,24 @@ class PlayerSprite(arcade.Sprite):
     
 
     def draw(self):
-        # Draw black fuel background
+        # Draw black fuel background 60, 256-90
         x, y = self.position
-        x += 30 * self.scale
-        y -= 10 * self.scale
-        w = 40 * self.scale
-        h = 110 * self.scale
-        arcade.draw_rectangle_filled(x, y, w, h, (0, 0, 0))
+        x += (60-128) * self.scale
+        y += (128-92) * self.scale
+        w = 50 * self.scale
+        h = 112 * self.scale
+        tilt = 28
+        arcade.draw_rectangle_filled(x, y, w, h, (0, 0, 0), tilt)
 
         # Draw blue fuel fill status
         h2 = self.fuel * h
-        y2 = y - (h - h2)/2
-        arcade.draw_rectangle_filled(x, y2, w, h2, (128, 128, 255))
-        
+        # y2 = y - (h - h2)/2
+        arcade.draw_rectangle_filled(x, y, w, h2, (128, 128, 255), tilt)
+
         # Draw character itself
         super().draw()
 
+        
         # Draw direction indicator
         self.direction_indicator.draw()
         

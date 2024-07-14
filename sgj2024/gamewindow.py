@@ -48,6 +48,7 @@ class GameWindow(arcade.Window):
         self.a_pressed = False
         self.s_pressed = False
         self.d_pressed = False
+        self.space_pressed = False
 
         self.bottle_00_texture: Optional[arcade.texture.Texture] = None
         self.bottle_01_texture: Optional[arcade.texture.Texture] = None
@@ -133,6 +134,9 @@ class GameWindow(arcade.Window):
             self.cacti, collision_type="cacti", body_type=arcade.PymunkPhysicsEngine.STATIC)
 
         self.physics_engine.add_sprite_list(
+            self.water, collision_type="water", body_type=arcade.PymunkPhysicsEngine.STATIC)
+
+        self.physics_engine.add_sprite_list(
             self.bottles, friction=WALL_FRICTION, collision_type="bottle", body_type=arcade.PymunkPhysicsEngine.STATIC)
 
         self.physics_engine.add_sprite_list(
@@ -157,6 +161,9 @@ class GameWindow(arcade.Window):
 
     def water_colision_handler(self, player_sprite: PlayerSprite, water_sprite: arcade.Sprite, _2, _3, _4):
         self.on_water = True
+        diff = player_sprite.center_y - water_sprite.center_y
+        if diff < 45:
+            return True
         return False
 
     def water_post_colision_handler(self, _0, _1, _2, _3, _4):
@@ -217,6 +224,8 @@ class GameWindow(arcade.Window):
                 self.s_pressed = True
             case arcade.key.D:
                 self.d_pressed = True
+            case arcade.key.SPACE:
+                self.space_pressed = True
 
     def on_key_release(self, key, modifiers):
         match key:
@@ -228,6 +237,8 @@ class GameWindow(arcade.Window):
                 self.s_pressed = False
             case arcade.key.D:
                 self.d_pressed = False
+            case arcade.key.SPACE:
+                self.space_pressed = False
 
     def on_update(self, delta_time):
         self.camera.move((self.player_sprite.center_x-self.width/2,
@@ -241,12 +252,24 @@ class GameWindow(arcade.Window):
 
         if self.on_water:
             self.delta_v = min(self.delta_v+DELTA_DELTAV, MAX_DELTAV)
+            if self.debug: print(self.delta_v)
+
+        if self.debug and self.space_pressed:
+            impulse = 1
 
         if impulse != 0:
             vector = np.zeros((2))
             vector[0] = np.cos(angle)
-            vector[1] = np.sin(angle) * (not player_on_ground or ((angle >
-                                                                   0.3 or angle < -0.3) and (angle > -2.8 or angle < 2.8)))
+            vector[1] = np.sin(angle) * (not player_on_ground or 
+                                         ((angle > 0.2 or angle < -0.2) and (angle > -np.pi-0.2 and angle < np.pi-0.2)))
+
+            if self.debug:
+                if self.space_pressed: vector = np.zeros((2))
+                if self.w_pressed: vector[1] += 1
+                if self.a_pressed: vector[0] -= 1
+                if self.s_pressed: vector[1] -= 1
+                if self.d_pressed: vector[0] += 1
+
             vector[0] *= impulse * \
                 min(self.delta_v if not player_on_ground else PLAYER_GROUND_ACCELERATION, PLAYER_GROUND_ACCELERATION if player_on_ground else PLAYER_JETPACK_ACCELERATION if self.delta_v >
                     0 else PLAYER_AIR_ACCELERATION)
@@ -254,45 +277,16 @@ class GameWindow(arcade.Window):
                 min(self.delta_v, PLAYER_JETPACK_ACCELERATION)
 
             sub = min(self.delta_v, np.sum(np.abs(vector)))
-            self.delta_v = self.delta_v - (0 if player_on_ground else sub)
+            self.delta_v = self.delta_v - \
+                (0 if player_on_ground else sub)
             if self.debug:
-                print(self.delta_v, vector, sub)
+                print(self.delta_v, vector, sub, angle)
 
             self.physics_engine.apply_force(self.player_sprite, tuple(vector))
-
-        if self.debug:
-            yeet_angle = 0.0
-            yeet_strength = 0.0
-            n_directions = self.w_pressed + self.a_pressed + self.s_pressed + self.d_pressed
-            if n_directions != 0 and self.delta_v > 0:
-                if self.w_pressed:
-                    self.yeet_force[1] += min(self.delta_v /
-                                              n_directions, PLAYER_JETPACK_ACCELERATION)
-                if self.a_pressed:
-                    self.yeet_force[0] -= min(self.delta_v /
-                                              n_directions, PLAYER_JETPACK_ACCELERATION)
-                if self.s_pressed:
-                    self.yeet_force[1] -= min(self.delta_v /
-                                              n_directions, PLAYER_JETPACK_ACCELERATION)
-                if self.d_pressed:
-                    self.yeet_force[0] += min(self.delta_v /
-                                              n_directions, PLAYER_JETPACK_ACCELERATION)
-                self.delta_v -= min(self.delta_v, PLAYER_JETPACK_ACCELERATION)
-                if self.debug:
-                    print(self.delta_v, self.yeet_force)
-
-                self.physics_engine.apply_force(
-                    self.player_sprite, tuple(self.yeet_force))
-                yeet_angle = np.atan2(*self.yeet_force)
-                yeet_strength = np.linalg.norm(self.yeet_force) / np.linalg.norm(
-                    (PLAYER_JETPACK_ACCELERATION, PLAYER_JETPACK_ACCELERATION))
-                self.yeet_force = [0, 0]
 
         self.physics_engine.step()
 
         self.player_sprite.update(angle, impulse, self.delta_v / MAX_DELTAV)
-        # if self.debug and yeet_strength > 0:
-        # self.player_sprite.update(-yeet_angle, yeet_strength, self.delta_v / MAX_DELTAV)
 
         mark_delete = []
         for bottle, timer in self.active_bottles.items():

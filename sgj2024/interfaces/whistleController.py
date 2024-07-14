@@ -24,6 +24,8 @@ class WhistleController(BaseController):
         self.vol_min = 0.3
         self.vol_max = 30
 
+        self.thread = None
+
 
 
     def __call__(self):
@@ -60,7 +62,8 @@ class WhistleController(BaseController):
             
     def stop(self):
         self.running = False
-        self.thread.join()
+        if self.thread is not None:
+            self.thread.join()
 
     def pollAxis(self) -> tuple[float, float]:
         """return the value of the analog axis in order of strength, direction"""

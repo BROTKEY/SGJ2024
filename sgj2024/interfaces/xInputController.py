@@ -12,6 +12,8 @@ class XInputController(BaseController):
         self.angle = 0
         self.impulse = 0
         self.is_windows = 'windows' in platform().lower()
+        self.manager = None
+        self.controller = None
 
 
     def start(self) -> None:
@@ -32,8 +34,11 @@ class XInputController(BaseController):
             self.controller.close()
 
     def stop(self) -> None:
-        self.manager.remove_handlers()
-        self.controller.close()
+        if self.manager is not None:
+            self.manager.remove_handlers()
+        if self.controller is not None:
+            self.controller.close()
+        
 
 
     def unit_vector(self, vector):

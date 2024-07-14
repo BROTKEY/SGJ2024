@@ -38,6 +38,7 @@ class GameWindow(arcade.Window):
         self.birb_list: Optional[arcade.SpriteList] = None
 
         self.birb_grab: Optional[arcade.Sprite] = None
+        self.birb_timer = 0
 
         self.physics_engine: Optional[arcade.PymunkPhysicsEngine] = None
         self.player_sprite = None
@@ -229,7 +230,7 @@ class GameWindow(arcade.Window):
 
     def birb_collision_handler(self, player_sprite, birb_sprite, arbiter, space, data):
         if self.birb_timer == 0:
-            self.birb_timer = BIRB_TIMER
+            self.birb_timer = BIRB_TIMER+BIRB_COOLDOWN
             self.birb_grab = birb_sprite
         return False
 
@@ -300,10 +301,14 @@ class GameWindow(arcade.Window):
 
         self.player_sprite.pymunk.max_horizontal_velocity = PLAYER_MAX_HORIZONTAL_VELOCITY if player_on_ground else PLAYER_MAX_HORIZONTAL_AIR_VELOCITY
 
-        if self.birb_timer > 0 :
-
+        if self.birb_timer > BIRB_COOLDOWN:
+            impulse, angle = 0, 0
+            x,y = self.birb_grab.center_x, self.birb_grab.center_y
+            self.physics_engine.set_position(self.player_sprite, (x-BIRB_GRAB_X_OFFSET, y-BIRB_GRAB_Y_OFFSET)) 
+            self.physics_engine.set_velocity(self.player_sprite, (0,0))
+            if self.debug: print(x,y,self.player_sprite.position)
+        if self.birb_timer > 0:
             self.birb_timer -= 1
-
 
         if self.on_water:
             self.delta_v = min(self.delta_v+DELTA_DELTAV, MAX_DELTAV)
@@ -362,7 +367,6 @@ class GameWindow(arcade.Window):
             velocity = np.array(self.physics_engine.get_physics_object(self.player_sprite).body.velocity)
             velocity[0] *= MAP_BOUNDS_BOUNCE * -1
             self.physics_engine.set_velocity(self.player_sprite, tuple(velocity))
-            if self.debug: print(f"Bounce! {velocity}")
         
         for birb in self.birb_list:
             self.physics_engine.set_position(birb, (birb.position[0]-BIRB_SPEED, birb.position[1]))
@@ -391,9 +395,8 @@ class GameWindow(arcade.Window):
         self.birb_list.draw()
         for birb in self.birb_list:
             x, y = birb.position
-            x += self.map_bounds_x
-            birb.position = (x,y)
+            birb.position = (x+self.map_bounds_x,y)
             birb.draw()
-            x -= self.map_bounds_x * 2
-            birb.position = (x,y)
+            birb.position = (x-self.map_bounds_x,y)
             birb.draw()
+            birb.position = (x,y)

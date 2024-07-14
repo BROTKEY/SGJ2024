@@ -262,8 +262,8 @@ class GameWindow(arcade.Window):
         self.physics_engine.step()
 
         self.player_sprite.update(angle, impulse, self.delta_v / MAX_DELTAV)
-        if self.debug and yeet_strength > 0:
-            self.player_sprite.update(-yeet_angle, yeet_strength, self.delta_v / MAX_DELTAV)
+        # if self.debug and yeet_strength > 0:
+            # self.player_sprite.update(-yeet_angle, yeet_strength, self.delta_v / MAX_DELTAV)
 
         mark_delete = []
         for bottle, timer in self.active_bottles.items():

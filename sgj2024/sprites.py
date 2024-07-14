@@ -67,5 +67,41 @@ class DirectionIndicator(arcade.Sprite):
         
 
     def draw(self):
-        if self.input_force > 0:
-            super().draw()
+        # if self.input_force <= 0:
+        #     return
+        
+        def R(theta):
+            return np.array([[np.cos(theta), -np.sin(theta)],
+                             [np.sin(theta), np.cos(theta)]])
+        
+        def rotate(points, theta):
+            v = np.reshape(points, (-1, 2)).T
+            return np.dot(R(theta), v).T.reshape(points.shape)
+        
+        tri_w = 256 - 2*32
+        tri_h = 256 - 2*20
+        tri_w_2 = tri_w/2
+        tri_h_2 = tri_h/2
+        tri_x = -128 + 32
+        tri_y = -128 + 20
+
+        pos = [-128, -128]
+        P = np.array([[32, 20], [220, 20], [128, 236]], dtype='float')
+
+        P = np.array([[tri_x, tri_y],                   # bottom left
+                      [tri_x+tri_w, tri_y],             # bottom right
+                      [tri_x + tri_w - self.input_force*tri_w_2, tri_y + (self.input_force)*tri_h],     # top right
+                      [tri_x + self.input_force*tri_w_2, tri_y + (self.input_force)*tri_h]      # top left
+                     ],
+                     dtype='float')
+
+        # P += pos
+        P *= self.scale
+
+        P = rotate(P, self.input_direction)
+        P += self.position
+
+        arcade.draw_polygon_filled(P.tolist(), (0, 0, 255))
+        P += pos
+
+        super().draw()

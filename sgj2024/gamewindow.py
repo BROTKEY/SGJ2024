@@ -314,7 +314,10 @@ class GameWindow(arcade.Window):
 
         if self.player_sprite.position[0] < self.player_sprite.width/2 or self.player_sprite.position[0] > self.map_bounds_x - self.player_sprite.width/2:
             velocity = np.array(self.physics_engine.get_physics_object(self.player_sprite).body.velocity)
-            velocity[0] *= MAP_BOUNDS_BOUNCE * -1
+            if self.player_sprite.position[0] < self.player_sprite.width/2:
+                velocity[0] = np.abs(velocity[0]*MAP_BOUNDS_BOUNCE*-1)
+            else:
+                velocity[0] = np.abs(velocity[0]*MAP_BOUNDS_BOUNCE*-1)*-1
             self.physics_engine.set_velocity(self.player_sprite, tuple(velocity))
             if self.debug: print(f"Bounce! {velocity}")
 

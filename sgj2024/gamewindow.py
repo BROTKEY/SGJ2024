@@ -139,6 +139,9 @@ class GameWindow(arcade.Window):
         self.physics_engine.add_sprite_list(
             self.bottles, friction=WALL_FRICTION, collision_type="bottle", body_type=arcade.PymunkPhysicsEngine.STATIC)
 
+        self.physics_engine.add_sprite_list(
+            self.water, collision_type="water", body_type=arcade.PymunkPhysicsEngine.STATIC)
+
         self.physics_engine.add_collision_handler(
             "player", "bottle", self.bottle_colision_handler)
 
@@ -146,10 +149,10 @@ class GameWindow(arcade.Window):
             "player", "cacti", self.cacti_colision_handler)
 
         self.physics_engine.add_collision_handler(
-            "player", "water", pre_handler=self.water_colision_handler, separate_handler=self.water_post_colision_handler)
+            "player", "finish", begin_handler=self.level_finished)
 
         self.physics_engine.add_collision_handler(
-            "player", "finish", begin_handler=self.level_finished)
+            "player", "water", pre_handler=self.water_colision_handler, separate_handler=self.water_post_colision_handler)
 
     def level_finished(self, _0, _1, _2, _3, _4):
         if self.debug:

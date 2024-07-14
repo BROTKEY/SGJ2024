@@ -26,9 +26,6 @@ class WhistleController(BaseController):
 
         self.thread = Thread(target=self)
 
-        # self.freq_hist = []
-        # self.vol_hist = []
-
 
     def __call__(self):
         audio = pyaudio.PyAudio()
@@ -46,17 +43,15 @@ class WhistleController(BaseController):
             fft_data = np.abs(np.fft.fft(data))
             imax = np.argmax(fft_data)
             vmax = fft_data[imax]
-            # print(imax, vmax)
             v = (vmax - self.vol_min) / dv
             f = (imax - self.freq_min) / di
-            # print(v, f)
             vol_hist.append(np.clip(v, 0., 1.))
             freq_hist.append(np.clip(f, 0., 1.))
+            # Smooth out by averaging over last 5 samples
             if len(vol_hist) > 5:
                 vol_hist.pop(0)
             if len(freq_hist) > 5:
                 freq_hist.pop(0)
-            # self.volume, self.freq = np.clip((v, f), 0., 1.)
             self.volume = np.average(vol_hist)
             self.freq = np.average(freq_hist)
 

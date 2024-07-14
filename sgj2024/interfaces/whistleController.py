@@ -21,10 +21,13 @@ class WhistleController(BaseController):
         # Maximum index in FFT data (= highest frequency), everything above this is counted as 1
         self.freq_max = 50
         # Volume thersholds
-        self.vol_min = 0.2
-        self.vol_max = 50
+        self.vol_min = 0.3
+        self.vol_max = 30
 
         self.thread = Thread(target=self)
+
+        # self.freq_hist = []
+        # self.vol_hist = []
 
 
     def __call__(self):
@@ -35,6 +38,9 @@ class WhistleController(BaseController):
         dv = self.vol_max - self.vol_min
         di = self.freq_max - self.freq_min
         
+        freq_hist = []
+        vol_hist = []
+        
         while self.running:
             data = np.frombuffer(stream.read(self.buffer_size), dtype=np.float32)
             fft_data = np.abs(np.fft.fft(data))
@@ -44,7 +50,15 @@ class WhistleController(BaseController):
             v = (vmax - self.vol_min) / dv
             f = (imax - self.freq_min) / di
             # print(v, f)
-            self.volume, self.freq = np.clip((v, f), 0., 1.)
+            vol_hist.append(np.clip(v, 0., 1.))
+            freq_hist.append(np.clip(f, 0., 1.))
+            if len(vol_hist) > 5:
+                vol_hist.pop(0)
+            if len(freq_hist) > 5:
+                freq_hist.pop(0)
+            # self.volume, self.freq = np.clip((v, f), 0., 1.)
+            self.volume = np.average(vol_hist)
+            self.freq = np.average(freq_hist)
 
     def start(self):
         self.thread.start()

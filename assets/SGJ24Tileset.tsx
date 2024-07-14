@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.8" tiledversion="1.8.0" name="SGJ24Tileset" tilewidth="768" tileheight="1024" tilecount="38" columns="0">
+<tileset version="1.8" tiledversion="1.8.0" name="SGJ24Tileset" tilewidth="768" tileheight="1024" tilecount="40" columns="0">
  <grid orientation="orthogonal" width="1" height="1"/>
  <tile id="0">
   <image width="256" height="256" source="SGJ24TILES/asset1.png"/>
@@ -143,5 +143,11 @@
     <polygon points="0,0 189,-55 677,-42 732,29 714,223 564,285 13,233 -38,138"/>
    </object>
   </objectgroup>
+ </tile>
+ <tile id="69">
+  <image width="256" height="256" source="SGJ24TILES/jungle_stuff_2.png"/>
+ </tile>
+ <tile id="70">
+  <image width="256" height="256" source="SGJ24TILES/Jungle_stuff_top.png"/>
  </tile>
 </tileset>

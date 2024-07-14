@@ -27,11 +27,13 @@ class GameWindow(arcade.Window):
         self.debug = debug
 
         self.current_level = 1
+        self.on_water = False
         self.background_elements: Optional[arcade.SpriteList] = None
         self.background_accents: Optional[arcade.SpriteList] = None
         self.wall_elements: Optional[arcade.SpriteList] = None
         self.bottles: Optional[arcade.SpriteList] = None
         self.cacti: Optional[arcade.SpriteList] = None
+        self.water: Optional[arcade.SpriteList] = None
 
         self.physics_engine: Optional[arcade.PymunkPhysicsEngine] = None
         self.player_sprite = None
@@ -41,7 +43,7 @@ class GameWindow(arcade.Window):
         self.finish_list: Optional[arcade.SpriteList] = None
 
         self.yeet_force = [0, 0]
-        self.delta_v = 0
+        self.delta_v = MAX_DELTAV
         self.w_pressed = False
         self.a_pressed = False
         self.s_pressed = False
@@ -103,6 +105,7 @@ class GameWindow(arcade.Window):
         self.wall_elements = tile_map.sprite_lists["Platforms"]
         self.bottles = tile_map.sprite_lists["Bottles"]
         self.cacti = tile_map.sprite_lists["Cacti"]
+        self.water = tile_map.sprite_lists["Water"]
 
         self.physics_engine = arcade.PymunkPhysicsEngine(
             damping=PHYSICS_DAMPING, gravity=(0, -PHYSICS_GRAVITY))
@@ -130,6 +133,9 @@ class GameWindow(arcade.Window):
             self.cacti, collision_type="cacti", body_type=arcade.PymunkPhysicsEngine.STATIC)
 
         self.physics_engine.add_sprite_list(
+            self.water, collision_type="water", body_type=arcade.PymunkPhysicsEngine.STATIC)
+
+        self.physics_engine.add_sprite_list(
             self.bottles, friction=WALL_FRICTION, collision_type="bottle", body_type=arcade.PymunkPhysicsEngine.STATIC)
 
         self.physics_engine.add_collision_handler(
@@ -139,12 +145,25 @@ class GameWindow(arcade.Window):
             "player", "cacti", self.cacti_colision_handler)
 
         self.physics_engine.add_collision_handler(
+            "player", "water", begin_handler=self.water_colision_handler, separate_handler=self.water_post_colision_handler)
+
+        self.physics_engine.add_collision_handler(
             "player", "finish", begin_handler=self.level_finished)
 
     def level_finished(self, _0, _1, _2, _3, _4):
         if self.debug:
             print("Level Finished!")
         return False
+
+    def water_colision_handler(self, _0, _1, _2, _3, _4):
+        print("OnWater")
+        self.on_water = True
+        return True
+
+    def water_post_colision_handler(self, _0, _1, _2, _3, _4):
+        print("Exit")
+        self.on_water = False
+        return True
 
     def cacti_colision_handler(self, player_sprite: PlayerSprite, cacti_sprite: arcade.Sprite, arbiter: pymunk.Arbiter, space, data):
         velocity = self.physics_engine.get_physics_object(
@@ -223,7 +242,7 @@ class GameWindow(arcade.Window):
 
         self.player_sprite.pymunk.max_horizontal_velocity = PLAYER_MAX_HORIZONTAL_VELOCITY if player_on_ground else PLAYER_MAX_HORIZONTAL_AIR_VELOCITY
 
-        if player_on_ground:
+        if player_on_ground and self.on_water:
             self.delta_v = min(self.delta_v+DELTA_DELTAV, MAX_DELTAV)
 
         if impulse != 0:
@@ -238,7 +257,8 @@ class GameWindow(arcade.Window):
                 min(self.delta_v, PLAYER_JETPACK_ACCELERATION)
 
             sub = min(self.delta_v, np.sum(np.abs(vector)))
-            self.delta_v = self.delta_v - (0 if player_on_ground else sub)
+            self.delta_v = self.delta_v - \
+                (0 if player_on_ground else sub)
             if self.debug:
                 print(self.delta_v, vector, sub)
 
@@ -307,9 +327,10 @@ class GameWindow(arcade.Window):
         self.camera.use()
 
         self.background_elements.draw()
+        self.bottles.draw()
+        self.cacti.draw()
+        self.water.draw()
         self.background_accents.draw()
         self.wall_elements.draw()
         self.finish_list.draw()
-        self.bottles.draw()
-        self.cacti.draw()
         self.player_sprite.draw()

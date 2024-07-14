@@ -18,7 +18,7 @@ Launch the game:
 ```shell
 launch_game
 ```
-(Optional) Launch in debug mode if you do not have a leapmotion device available:
+(Optional) Launch in debug mode: 
 ```shell
 launch_game --debug
 ```

@@ -31,6 +31,7 @@ class GameWindow(arcade.Window):
         self.background_elements: Optional[arcade.SpriteList] = None
         self.background_accents: Optional[arcade.SpriteList] = None
         self.wall_elements: Optional[arcade.SpriteList] = None
+        self.icy_elements: Optional[arcade.SprileList] = None
         self.bottles: Optional[arcade.SpriteList] = None
         self.cacti: Optional[arcade.SpriteList] = None
         self.water: Optional[arcade.SpriteList] = None
@@ -38,7 +39,7 @@ class GameWindow(arcade.Window):
         self.physics_engine: Optional[arcade.PymunkPhysicsEngine] = None
         self.player_sprite = None
 
-        self.start_sprite: Optional[arcade.Sprite] = None
+        self.start_sprites: Optional[arcade.SpriteList] = None
         self.finish_sprite: Optional[arcade.Sprite] = None
         self.finish_list: Optional[arcade.SpriteList] = None
 
@@ -84,6 +85,12 @@ class GameWindow(arcade.Window):
         """Cleanup (like stopping our interfaces)"""
         self.controller.stop()
 
+    def move_player_to_spawn(self, spawn_id):
+        if spawn_id < len(self.start_sprites):
+            self.physics_engine.set_position(self.player_sprite, self.start_sprites[spawn_id].position)
+        else:
+            print(f"Invalid Spawn ID: {spawn_id}")
+
     def load_level(self, level):
         if self.debug:
             print(f"Debug: Loading Level: {level}")
@@ -98,9 +105,13 @@ class GameWindow(arcade.Window):
 
         self.background_sprite = BackgroundSprite(tile_map.width*SPRITE_SCALING_TILES)
 
-        self.start_sprite = tile_map.sprite_lists["Spawn"][0]
-        self.player_sprite.set_position(*self.
-                                        start_sprite.position)
+        self.start_sprites = arcade.SpriteList()
+        start_sprites = tile_map.sprite_lists["Spawn"]
+        sprite_height = {}
+        for sprite in start_sprites:
+            sprite_height[sprite] = sprite.center_y
+        for sprite, height in sorted(sprite_height.items(), key=lambda item: item[1]):
+            self.start_sprites.append(sprite)
 
         self.finish_sprite = tile_map.sprite_lists["Finish"][0]
         self.finish_list.append(self.finish_sprite)
@@ -109,12 +120,14 @@ class GameWindow(arcade.Window):
         self.background_elements = tile_map.sprite_lists["Background"]
         self.background_accents = tile_map.sprite_lists["BackgroundAccents"]
         self.wall_elements = tile_map.sprite_lists["Platforms"]
+        self.icy_elements = tile_map.sprite_lists["IcyPlatforms"]
         self.bottles = tile_map.sprite_lists["Bottles"]
         self.cacti = tile_map.sprite_lists["Cacti"]
         self.water = tile_map.sprite_lists["Water"]
 
         self.physics_engine = arcade.PymunkPhysicsEngine(
             damping=PHYSICS_DAMPING, gravity=(0, -PHYSICS_GRAVITY))
+
         self.physics_engine.add_sprite(self.player_sprite,
                                        friction=PLAYER_FRICTION,
                                        mass=PLAYER_MASS,
@@ -126,6 +139,12 @@ class GameWindow(arcade.Window):
 
         self.physics_engine.add_sprite_list(self.wall_elements,
                                             friction=WALL_FRICTION,
+                                            collision_type="wall",
+                                            body_type=arcade.PymunkPhysicsEngine.STATIC
+                                            )
+
+        self.physics_engine.add_sprite_list(self.icy_elements,
+                                            friction=ICY_FRICTION,
                                             collision_type="wall",
                                             body_type=arcade.PymunkPhysicsEngine.STATIC
                                             )
@@ -158,6 +177,8 @@ class GameWindow(arcade.Window):
 
         self.physics_engine.add_collision_handler(
             "player", "water", pre_handler=self.water_colision_handler, separate_handler=self.water_post_colision_handler)
+    
+        self.move_player_to_spawn(0)
 
     def level_finished(self, _0, _1, _2, _3, _4):
         if self.debug:
@@ -232,6 +253,9 @@ class GameWindow(arcade.Window):
                 self.space_pressed = True
             case arcade.key.BACKSPACE:
                 self.backspace_pressed = True
+            case num if key >= 48 and key <=57:
+                if self.debug:
+                    self.move_player_to_spawn(key-48)
 
     def on_key_release(self, key, modifiers):
         match key:
@@ -335,5 +359,6 @@ class GameWindow(arcade.Window):
         self.water.draw()
         self.background_accents.draw()
         self.wall_elements.draw()
+        self.icy_elements.draw()
         self.finish_list.draw()
         self.player_sprite.draw()

@@ -49,6 +49,7 @@ class GameWindow(arcade.Window):
         self.s_pressed = False
         self.d_pressed = False
         self.space_pressed = False
+        self.backspace_pressed = False
 
         self.bottle_00_texture: Optional[arcade.texture.Texture] = None
         self.bottle_01_texture: Optional[arcade.texture.Texture] = None
@@ -229,6 +230,8 @@ class GameWindow(arcade.Window):
                 self.d_pressed = True
             case arcade.key.SPACE:
                 self.space_pressed = True
+            case arcade.key.BACKSPACE:
+                self.backspace_pressed = True
 
     def on_key_release(self, key, modifiers):
         match key:
@@ -242,6 +245,8 @@ class GameWindow(arcade.Window):
                 self.d_pressed = False
             case arcade.key.SPACE:
                 self.space_pressed = False
+            case arcade.key.BACKSPACE:
+                self.backspace_pressed = False
 
     def on_update(self, delta_time):
         self.camera.move((self.player_sprite.center_x-self.width/2,
@@ -253,9 +258,13 @@ class GameWindow(arcade.Window):
 
         self.player_sprite.pymunk.max_horizontal_velocity = PLAYER_MAX_HORIZONTAL_VELOCITY if player_on_ground else PLAYER_MAX_HORIZONTAL_AIR_VELOCITY
 
+
         if self.on_water:
             self.delta_v = min(self.delta_v+DELTA_DELTAV, MAX_DELTAV)
             if self.debug: print(self.delta_v)
+
+        if self.debug and self.backspace_pressed:
+            self.delta_v = 0
 
         if self.debug and self.space_pressed:
             impulse = 1
@@ -273,9 +282,7 @@ class GameWindow(arcade.Window):
                 if self.s_pressed: vector[1] -= 1
                 if self.d_pressed: vector[0] += 1
 
-            vector[0] *= impulse * \
-                min(self.delta_v if not player_on_ground else PLAYER_GROUND_ACCELERATION, PLAYER_GROUND_ACCELERATION if player_on_ground else PLAYER_JETPACK_ACCELERATION if self.delta_v >
-                    0 else PLAYER_AIR_ACCELERATION)
+            vector[0] *= impulse * PLAYER_GROUND_ACCELERATION if player_on_ground else (min(self.delta_v, PLAYER_JETPACK_ACCELERATION) if self.delta_v > 0 else PLAYER_AIR_ACCELERATION)
             vector[1] *= impulse * \
                 min(self.delta_v, PLAYER_JETPACK_ACCELERATION)
 

@@ -17,9 +17,9 @@ class WhistleController(BaseController):
 
         # Calibration Data
         # Minimum index in FFT data (= lowest frequency), everything below this is counted as 0
-        self.freq_min = 10
+        self.freq_min = 20
         # Maximum index in FFT data (= highest frequency), everything above this is counted as 1
-        self.freq_max = 50
+        self.freq_max = 40
         # Volume thersholds
         self.vol_min = 0.3
         self.vol_max = 30
@@ -64,4 +64,5 @@ class WhistleController(BaseController):
 
     def pollAxis(self) -> tuple[float, float]:
         """return the value of the analog axis in order of strength, direction"""
-        return self.volume, (self.freq * 2 - 1) * np.pi
+        return self.volume, self.freq* np.pi
+        # return self.volume, (self.freq * 2 - 1) * np.pi

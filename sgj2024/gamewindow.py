@@ -162,8 +162,6 @@ class GameWindow(arcade.Window):
     def water_colision_handler(self, player_sprite: PlayerSprite, water_sprite: arcade.Sprite, _2, _3, _4):
         self.on_water = True
         diff = player_sprite.center_y - water_sprite.center_y
-        if diff < 45:
-            return True
         return False
 
     def water_post_colision_handler(self, _0, _1, _2, _3, _4):

@@ -3,17 +3,19 @@ from sgj2024.interfaces.whistleController import WhistleController
 from sgj2024.interfaces.xInputController import XInputController
 
 class HybridController(BaseController):
-    def __init__(self):
-        self.whistle = WhistleController()
-        self.xInput = XInputController()
+    def __init__(self, whistle, xinput):
+        self.whistle = whistle
+        self.xInput = xinput
 
     def start(self):
-        self.whistle.start()
-        self.xInput.start()
+        pass
+        # self.whistle.start()
+        # self.xInput.start()
 
     def stop(self):
-        self.whistle.stop()
-        self.xInput.stop()
+        pass
+        # self.whistle.stop()
+        # self.xInput.stop()
 
     def pollAxis(self):
         impulse1, angle1 = self.whistle.pollAxis()

@@ -11,6 +11,7 @@ from sgj2024.config import *
 from sgj2024.interfaces.baseController import BaseController
 from sgj2024.interfaces.xInputController import XInputController
 from sgj2024.interfaces.whistleController import WhistleController
+from sgj2024.interfaces.hybridController import HybridController
 
 
 LEVELS = {
@@ -105,7 +106,11 @@ class GameWindow(arcade.Window):
         self.xinput_controller.start()
         self.whistle_controller = WhistleController()
         self.whistle_controller.start()
+        self.hybrid_controller = HybridController(self.whistle_controller, self.xinput_controller)
+        self.hybrid_controller.start()
+        
         self.controller = self.xinput_controller
+        # self.controller.start()
 
         self.theme = arcade.load_sound('assets/sound/music.wav')
 
@@ -115,6 +120,8 @@ class GameWindow(arcade.Window):
         """Cleanup (like stopping our interfaces)"""
         self.xinput_controller.stop()
         self.whistle_controller.stop()
+        # self.hybrid_controller.stop()
+        # self.controller.stop()
 
     def move_player_to_spawn(self, spawn_id):
         if spawn_id < len(self.start_sprites):
@@ -310,15 +317,21 @@ class GameWindow(arcade.Window):
             case arcade.key.F1:
                 if not self.f1_pressed and self.controller != self.xinput_controller:
                     self.f1_pressed = True
+                    # self.controller.stop()
                     self.controller = self.xinput_controller
+                    # self.controller.start()
             case arcade.key.F2:
                 if not self.f2_pressed and self.controller != self.whistle_controller:
                     self.f2_pressed = True
+                    # self.controller.stop()
                     self.controller = self.whistle_controller
+                    # self.controller.start()
             case arcade.key.F3:
-                if not self.f3_pressed and self.controller != self.whistle_controller:
+                if not self.f3_pressed and self.controller != self.hybrid_controller:
                     self.f3_pressed = True
-                    # TODO
+                    # self.controller.stop()
+                    self.controller = self.hybrid_controller
+                    # self.controller.start()
             case num if key >= 48 and key <=57:
                 if self.debug:
                     self.move_player_to_spawn(key-48)

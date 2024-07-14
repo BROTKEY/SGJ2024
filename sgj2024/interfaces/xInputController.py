@@ -2,6 +2,8 @@ from sgj2024.interfaces.baseController import BaseController
 import pyglet.input as input 
 import numpy as np
 import pyglet
+from platform import platform
+
 
 class XInputController(BaseController):
     def __init__(self):
@@ -9,6 +11,7 @@ class XInputController(BaseController):
         self.controller = None
         self.angle = 0
         self.impulse = 0
+        self.is_windows = 'windows' in platform().lower()
 
     def unit_vector(self, vector):
 
@@ -20,6 +23,8 @@ class XInputController(BaseController):
         v1_u = self.unit_vector(v1)
         v2_u = self.unit_vector(v2)
         side = 1 if ly < 0 else -1
+        if self.is_windows:
+            side = -side
         return np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0)) / side
 
     def start(self):

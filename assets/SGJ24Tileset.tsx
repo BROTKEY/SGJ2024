@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.10" tiledversion="1.10.2" name="SGJ24Tileset" tilewidth="512" tileheight="1024" tilecount="33" columns="0">
+<tileset version="1.10" tiledversion="1.10.2" name="SGJ24Tileset" tilewidth="512" tileheight="1024" tilecount="34" columns="0">
  <grid orientation="orthogonal" width="1" height="1"/>
  <tile id="0">
   <image width="256" height="256" source="SGJ24TILES/asset1.png"/>
@@ -118,5 +118,8 @@
  </tile>
  <tile id="63">
   <image width="256" height="256" source="SGJ24TILES/winter_platform_mid.png"/>
+ </tile>
+ <tile id="64">
+  <image width="256" height="256" source="SGJ24TILES/Spawn.png"/>
  </tile>
 </tileset>

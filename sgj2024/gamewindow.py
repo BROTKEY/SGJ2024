@@ -145,7 +145,7 @@ class GameWindow(arcade.Window):
             "player", "cacti", self.cacti_colision_handler)
 
         self.physics_engine.add_collision_handler(
-            "player", "water", begin_handler=self.water_colision_handler, separate_handler=self.water_post_colision_handler)
+            "player", "water", pre_handler=self.water_colision_handler, separate_handler=self.water_post_colision_handler)
 
         self.physics_engine.add_collision_handler(
             "player", "finish", begin_handler=self.level_finished)
@@ -155,15 +155,15 @@ class GameWindow(arcade.Window):
             print("Level Finished!")
         return False
 
-    def water_colision_handler(self, _0, _1, _2, _3, _4):
-        print("OnWater")
+    def water_colision_handler(self, player_sprite: PlayerSprite, water_sprite: arcade.Sprite, _2, _3, _4):
         self.on_water = True
-        return True
+        diff = player_sprite.center_y - water_sprite.center_y
+        if diff < 45:
+            return True
+        return False
 
     def water_post_colision_handler(self, _0, _1, _2, _3, _4):
-        print("Exit")
         self.on_water = False
-        return True
 
     def cacti_colision_handler(self, player_sprite: PlayerSprite, cacti_sprite: arcade.Sprite, arbiter: pymunk.Arbiter, space, data):
         velocity = self.physics_engine.get_physics_object(

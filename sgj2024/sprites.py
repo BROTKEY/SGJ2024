@@ -56,7 +56,7 @@ class DirectionIndicator(arcade.Sprite):
     
     def update(self, player_position, direction, force):
         self.player_position = player_position
-        self.input_direction = direction
+        self.input_direction = direction-np.pi/2
         self.input_force = force
 
         self.angle = np.degrees(self.input_direction)
@@ -95,13 +95,17 @@ class DirectionIndicator(arcade.Sprite):
                      ],
                      dtype='float')
 
-        # P += pos
         P *= self.scale
 
         P = rotate(P, self.input_direction)
         P += self.position
 
-        arcade.draw_polygon_filled(P.tolist(), (0, 0, 255))
+        c0 = np.array([128, 128, 255])
+        c1 = np.array([255, 32, 32])
+        # c1 = np.array([144, 171, 7])
+        c = self.input_force * c1 + (1-self.input_force) * c0
+
+        arcade.draw_polygon_filled(P.tolist(), c.astype('int').tolist())
         P += pos
 
         super().draw()
